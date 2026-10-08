@@ -1,68 +1,101 @@
-# 3. Diagrama de classes
+# 3. Modelo de domínio e diagrama de classes
 
-Ponto de partida: a classe `Prompt` do livro da Chip Huyen (cap. 5), escrita em Python com Pydantic:
+Dos acontecimentos do negócio às coisas que o sistema guarda.
 
-```python
-class Prompt(BaseModel):
-    model_name: str
-    date_created: datetime
-    prompt_text: str
-    application: str
-    creator: str
+## 1. Event Storming: a troca de coleção contada em eventos
+
+Cada evento é algo que **aconteceu** no negócio, escrito no passado, com quem o provocou:
+
+```mermaid
+flowchart LR
+    E1["Coleção planejada<br/>(editor de moda)"] --> E2["Looks definidos<br/>(editor de moda)"]
+    E2 --> E3["Prompt escrito<br/>(editor + Claude)"]
+    E3 --> E4["Imagens geradas<br/>(IA de imagem)"]
+    E4 --> E5["Prompt aprovado<br/>(editor-chefe)"]
+    E5 --> E6["Looks entregues<br/>(para a engenharia)"]
 ```
 
-Ela já é, quase, um diagrama de classes. Abaixo, a versão deste projeto.
+> **Event Storming** foi criado por Alberto Brandolini por volta de 2013. Nasceu dentro do *Domain-Driven Design* (DDD), que é de onde vem o termo "modelo de domínio".
 
-## Versão 1 (o que está implementado)
+## 2. O modelo de domínio que sai dos eventos
+
+Os substantivos que se repetem nos eventos viram as classes:
 
 ```mermaid
 classDiagram
+    direction LR
+    class Colecao {
+        +string id
+        +string nome
+        +string temporada
+        +number ano
+        +string editorResponsavel
+    }
     class Prompt {
         +string id
         +string titulo
         +string texto
-        +string categoria
+        +number versao
+        +StatusDoPrompt status
+        +string aprovadoPor
         +string autor
-        +string modelo
-        +number temperatura
-        +Date criadoEm
-        +boolean oculto
         +paraDotprompt() string
     }
-    class Categoria {
-        +string nome
-        +number total
+    class Look {
+        +string peca
+        +string corETecido
+        +string textoGerado
+        +string imagemGerada
     }
-    Categoria "1" --> "*" Prompt : agrupa
+    class Entrega {
+        +Date data
+        +string[] looks
+        +string recebidoPor
+    }
+    class StatusDoPrompt {
+        <<enumeration>>
+        rascunho
+        aprovado
+    }
+    Colecao "1" --> "N" Prompt
+    Prompt "1" --> "N" Look : gera
+    Look "N" --> "1" Entrega : vai em
+    Prompt ..> StatusDoPrompt
 ```
 
-Na versão 1, `Categoria` não é guardada à parte: ela é **derivada** dos prompts (o sistema conta quantos prompts há em cada categoria). Isso é uma decisão de projeto que vale discutir.
+O `texto` do prompt usa `{{look}}` onde a peça muda. O código desse modelo está em [`functions/src/modelo.ts`](../functions/src/modelo.ts).
 
-## Atividade: versão 2
+### Decisões de projeto para discutir
 
-O livro aponta um problema: se várias aplicações usam o mesmo prompt e ele é alterado, todas mudam juntas. Como resolver? Uma resposta possível:
+- **Um só aprovado por coleção.** Aprovar um prompt devolve o antigo padrão a rascunho. É uma regra de negócio, não uma limitação técnica.
+- **O `{{look}}` é uma variável.** O mesmo prompt gera um look por peça, e na exportação `.prompt` ele vira a entrada declarada (`input.schema`).
+- **`versao` existe, mas é sempre 1.** O campo está no modelo para o desafio da v3.
+- **`imagemGerada` existe, mas a v1 não preenche.** Gerar a imagem é trabalho da IA de imagem, fora deste sistema.
+
+## Desafio v3: versões de cada prompt (H06)
+
+Hoje, alterar um prompt apagaria o texto anterior, e quem já usou a versão antiga perde a referência. Uma resposta possível:
 
 ```mermaid
 classDiagram
     class Prompt {
         +string id
         +string titulo
-        +string categoria
+        +string colecao
         +versaoAtual() Versao
     }
     class Versao {
         +number numero
         +string texto
-        +string modelo
         +Date criadaEm
         +string motivoDaMudanca
+        +StatusDoPrompt status
     }
-    class Aplicacao {
-        +string nome
-        +number versaoFixada
+    class Look {
+        +number versaoUsada
     }
     Prompt "1" *-- "1..*" Versao : tem
-    Aplicacao "*" --> "1" Prompt : usa
+    Look "*" --> "1" Versao : gerado por
 ```
 
-Cada aplicação **fixa** a versão que usa. Uma mudança no prompt cria uma `Versao` nova sem quebrar quem depende da antiga.
+Cada look **fixa** a versão que o gerou. Uma mudança no prompt cria uma `Versao` nova, e dá para comparar as coleções.

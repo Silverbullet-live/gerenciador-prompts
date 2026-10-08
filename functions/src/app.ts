@@ -1,14 +1,14 @@
 import express, { type Request, type Response } from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { criarServidorMcp } from "./servidorMcp.js";
-import type { RepositorioDePrompts } from "./repositorio.js";
+import type { Repositorio } from "./repositorio.js";
 
 /**
  * Aplicação HTTP do conector. Usa o transporte Streamable HTTP do MCP em modo
  * "sem estado": cada requisição cria um servidor novo. Isso combina com
  * funções serverless, que não guardam memória entre chamadas (RNF05).
  */
-export function criarApp(repo: RepositorioDePrompts) {
+export function criarApp(repo: Repositorio) {
   const app = express();
   app.use(express.json({ limit: "64kb" }));
 

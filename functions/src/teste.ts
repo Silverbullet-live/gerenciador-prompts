@@ -1,6 +1,8 @@
 /**
- * Teste de ponta a ponta: sobe o servidor com o repositório em memória e
- * conversa com ele como o Claude faria, usando o cliente MCP oficial.
+ * Teste de ponta a ponta: sobe o servidor com o repositório em memória e conversa com
+ * ele como o Claude faria, usando o cliente MCP oficial. Percorre a troca de coleção
+ * da Fashion Co. na ordem do Event Storming (docs/03-classes.md):
+ * salvar → buscar → reusar trocando os looks → aprovar → entregar.
  *   npm test
  */
 import assert from "node:assert/strict";
@@ -25,67 +27,125 @@ async function conectar() {
 
 try {
   const cliente = await conectar();
+  const chamar = async (name: string, args: Record<string, unknown> = {}) =>
+    (await cliente.callTool({ name, arguments: args })) as Resultado;
 
   const { tools } = await cliente.listTools();
-  assert.deepEqual(tools.map((t) => t.name).sort(), ["buscar_prompts", "listar_categorias", "obter_prompt", "salvar_prompt"]);
-  console.log("✓ quatro ferramentas publicadas");
+  assert.deepEqual(tools.map((t) => t.name).sort(), [
+    "aprovar_prompt",
+    "buscar_prompts",
+    "entregar_colecao",
+    "listar_colecoes",
+    "obter_prompt",
+    "reusar_prompt",
+    "salvar_prompt",
+  ]);
+  console.log("✓ sete ferramentas publicadas");
 
-  assert.match(textoDe(await cliente.callTool({ name: "listar_categorias", arguments: {} })), /Ainda não há categorias/);
-  console.log("✓ lista vazia no início");
+  assert.match(textoDe(await chamar("listar_colecoes")), /Ainda não há coleções/);
+  console.log("✓ nenhuma coleção no início");
 
+  // H01 · salvar prompt da coleção
   const salvo = textoDe(
-    await cliente.callTool({
-      name: "salvar_prompt",
-      arguments: {
-        titulo: "Resumo para revisão",
-        texto: "Resuma o texto abaixo em 5 tópicos para eu revisar antes da prova:\n{{texto}}",
-        categoria: "Estudo",
-        autor: "rafa",
-        modelo: "claude-sonnet",
-        temperatura: 0.3,
-      },
+    await chamar("salvar_prompt", {
+      titulo: "Editorial de praia",
+      texto:
+        "Foto editorial de moda, luz natural de fim de tarde numa praia. A modelo veste {{look}}. Enquadramento de corpo inteiro, fundo desfocado.",
+      colecao: "Verão 2027",
+      temporada: "verão",
+      ano: 2027,
+      autor: "rafa",
+      modelo: "imagen-4",
+      temperatura: 0.4,
     }),
   );
   const id = salvo.match(/id (\S+)/)?.[1];
   assert.ok(id, "deveria devolver um id");
-  assert.match(salvo, /categoria "estudo"/);
-  console.log("✓ salva e normaliza a categoria");
+  assert.match(salvo, /coleção "Verão 2027", como rascunho/);
+  console.log("✓ salva na coleção, como rascunho (H01)");
 
-  await cliente.callTool({
-    name: "salvar_prompt",
-    arguments: { titulo: "Revisor de código", texto: "Revise este código Python e aponte bugs.", categoria: "Código" },
+  const semLook = textoDe(
+    await chamar("salvar_prompt", {
+      titulo: "Fundo de estúdio",
+      texto: "Foto de estúdio com fundo cinza e luz difusa, vestido vermelho de seda.",
+      colecao: "Verão 2027",
+      autor: "lu",
+    }),
+  );
+  const idSemLook = semLook.match(/id (\S+)/)?.[1]!;
+  assert.match(semLook, /não tem \{\{look\}\}/);
+  console.log("✓ avisa quando o prompt não tem {{look}}");
+
+  await chamar("salvar_prompt", { titulo: "Lookbook de inverno", texto: "Lookbook na neve com {{look}}.", colecao: "Inverno 2027" });
+
+  assert.match(textoDe(await chamar("listar_colecoes")), /Verão 2027 \(verão 2027\): 2 prompt\(s\) · sem prompt aprovado/);
+  console.log("✓ lista coleções com contagem");
+
+  // H02 · buscar por coleção
+  const busca = textoDe(await chamar("buscar_prompts", { colecao: "verão 2027" }));
+  assert.match(busca, /Editorial de praia/);
+  assert.match(busca, /Fundo de estúdio/);
+  assert.doesNotMatch(busca, /Lookbook de inverno/);
+  console.log("✓ busca por coleção (H02)");
+
+  // H03 · reusar trocando os looks
+  const reuso = await chamar("reusar_prompt", {
+    id,
+    looks: [
+      { peca: "vestido midi", corETecido: "verde-oliva, linho" },
+      { peca: "conjunto de alfaiataria", corETecido: "areia, crepe" },
+    ],
   });
+  assert.equal(reuso.isError, undefined);
+  assert.match(textoDe(reuso), /A modelo veste vestido midi, verde-oliva, linho\./);
+  assert.match(textoDe(reuso), /A modelo veste conjunto de alfaiataria, areia, crepe\./);
+  assert.match(textoDe(reuso), /ainda é rascunho/);
+  console.log("✓ reusa trocando os looks (H03)");
 
-  assert.match(textoDe(await cliente.callTool({ name: "listar_categorias", arguments: {} })), /codigo: 1[\s\S]*estudo: 1/);
-  console.log("✓ conta por categoria");
+  const reusoSemLook = await chamar("reusar_prompt", { id: idSemLook, looks: [{ peca: "saia" }] });
+  assert.equal(reusoSemLook.isError, true);
+  console.log("✓ recusa reusar prompt sem {{look}}");
 
-  const busca = textoDe(await cliente.callTool({ name: "buscar_prompts", arguments: { termo: "prova" } }));
-  assert.match(busca, /Resumo para revisão/);
-  assert.doesNotMatch(busca, /Revisor de código/);
-  console.log("✓ busca por termo");
+  // H05 antes de H04: sem aprovado, não há entrega
+  const cedo = await chamar("entregar_colecao", { colecao: "Verão 2027", recebidoPor: "eng.joao" });
+  assert.equal(cedo.isError, true);
+  assert.match(textoDe(cedo), /ainda não tem prompt aprovado/);
+  console.log("✓ não entrega coleção sem prompt aprovado");
 
-  const doc = textoDe(await cliente.callTool({ name: "obter_prompt", arguments: { id } }));
-  assert.match(doc, /Arquivo sugerido: estudo\/resumo_para_revisao\.prompt/);
-  assert.match(doc, /^---\nmodel: claude-sonnet\nconfig:\n  temperature: 0\.3\n/m);
-  assert.match(doc, /\{\{texto\}\}/);
-  console.log("✓ exporta em Dotprompt");
+  // H04 · aprovar prompt padrão (um só por coleção)
+  assert.match(textoDe(await chamar("aprovar_prompt", { id: idSemLook, aprovadoPor: "chefe.ana" })), /agora é o prompt aprovado/);
+  const troca = textoDe(await chamar("aprovar_prompt", { id, aprovadoPor: "chefe.ana" }));
+  assert.match(troca, /"Fundo de estúdio", voltou a rascunho/);
+  const aprovados = textoDe(await chamar("buscar_prompts", { colecao: "Verão 2027", somenteAprovados: true }));
+  assert.match(aprovados, /^1 prompt\(s\):/);
+  assert.match(aprovados, /Editorial de praia .* ★ aprovado/);
+  console.log("✓ aprova o padrão e só existe um por coleção (H04)");
 
-  const inexistente = (await cliente.callTool({ name: "obter_prompt", arguments: { id: "nao-existe" } })) as Resultado;
-  assert.equal(inexistente.isError, true);
-  console.log("✓ erro claro para id inexistente");
+  // Publicar a partir de .prompt
+  const doc = textoDe(await chamar("obter_prompt", { id }));
+  assert.match(doc, /Arquivo sugerido: verao-2027\/editorial_de_praia\.prompt/);
+  assert.match(doc, /^---\nmodel: imagen-4\nconfig:\n  temperature: 0\.4\ninput:\n  schema:\n    look: string, a peça com cor e tecido\n/m);
+  assert.match(doc, /status: aprovado/);
+  assert.match(doc, /\{\{look\}\}/);
+  console.log("✓ exporta em Dotprompt, com {{look}} como entrada declarada");
 
-  const grande = (await cliente.callTool({
-    name: "salvar_prompt",
-    arguments: { titulo: "x", texto: "a".repeat(5000), categoria: "teste" },
-  })) as Resultado;
-  assert.equal(grande.isError, true);
-  console.log("✓ recusa texto acima de 4.000 caracteres (RNF04)");
+  // H05 · entregar à engenharia
+  const entrega = textoDe(await chamar("entregar_colecao", { colecao: "Verão 2027", recebidoPor: "eng.joao" }));
+  assert.match(entrega, /Entrega \S+ registrada para eng\.joao/);
+  assert.match(entrega, /Looks enviados \(2\):\n• vestido midi \(verde-oliva, linho\)\n• conjunto de alfaiataria \(areia, crepe\)/);
+  console.log("✓ entrega o .prompt aprovado e os looks à engenharia (H05)");
+
+  // Erros e limites
+  assert.equal((await chamar("obter_prompt", { id: "nao-existe" })).isError, true);
+  assert.equal((await chamar("salvar_prompt", { titulo: "x", texto: "a".repeat(5000), colecao: "teste" })).isError, true);
+  console.log("✓ erro claro para id inexistente e texto acima de 4.000 caracteres");
 
   await cliente.close();
 
   // Modo sem estado: uma conexão nova enxerga os mesmos dados.
   const outro = await conectar();
-  assert.match(textoDe(await outro.callTool({ name: "buscar_prompts", arguments: { categoria: "codigo" } })), /Revisor de código/);
+  const r = (await outro.callTool({ name: "buscar_prompts", arguments: { colecao: "Inverno 2027" } })) as Resultado;
+  assert.match(textoDe(r), /Lookbook de inverno/);
   await outro.close();
   console.log("✓ nova conexão vê os dados (servidor sem estado)");
 

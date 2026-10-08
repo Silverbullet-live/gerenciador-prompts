@@ -1,15 +1,14 @@
 rules_version = '2';
 
-// RNF04: o mural só lê; quem grava é o servidor MCP (que usa a conta de
-// serviço do Firebase e não passa por estas regras).
+// Segurança (docs/01-requisitos.md): o mural só lê; quem grava é o servidor MCP, que usa
+// a conta de serviço do Firebase e não passa por estas regras.
+// Leitura pública de propósito: o mural é projetado em sala. Por isso ninguém salva dados pessoais.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /prompts/{id} {
-      allow read: if true;
-      allow write: if false;
-    }
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /colecoes/{id} { allow read: if true; allow write: if false; }
+    match /prompts/{id}  { allow read: if true; allow write: if false; }
+    match /looks/{id}    { allow read: if true; allow write: if false; }
+    // Entregas são da engenharia: não aparecem no mural.
+    match /{document=**} { allow read, write: if false; }
   }
 }

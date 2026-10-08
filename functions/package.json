@@ -1,7 +1,7 @@
 {
   "name": "gerenciador-prompts-mcp",
   "version": "1.0.0",
-  "description": "Servidor MCP remoto do Gerenciador de Prompts (conector para o app do Claude)",
+  "description": "Servidor MCP do Gerenciador de Prompts da Fashion Co. (conector para o app do Claude)",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -15,6 +15,7 @@
     "deploy": "npm run build && firebase deploy --only functions,firestore,hosting"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^9.3.1",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "express": "^5.2.1",
     "firebase-admin": "^14.5.0",

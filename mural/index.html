@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mural de Prompts</title>
+<title>Mural de Prompts · Fashion Co.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +17,7 @@
     --azul: #2E7E8C;
     --azul-claro: #DCEFF2;
     --alerta: #B4532A;
+    --ouro: #C99A2E;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -73,6 +74,10 @@
   }
   .cartao.novo { animation: chegada 0.9s ease-out; }
   @keyframes chegada { from { background: var(--azul-claro); transform: translateY(-8px); } to { background: var(--cartao); transform: none; } }
+  .cartao.aprovado { border-left-color: var(--ouro); }
+  .topo-cartao { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .selo { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B4A00; background: #FFF0C2; border-radius: 999px; padding: 3px 12px; white-space: nowrap; }
+  .texto mark { background: var(--azul-claro); color: var(--marinho); font-weight: 500; border-radius: 3px; padding: 0 3px; }
   .categoria { font-size: 15px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--azul); }
   .titulo { font-size: 24px; font-weight: 600; line-height: 1.25; margin: 0; }
   .texto {
@@ -109,17 +114,17 @@
 </head>
 <body>
 <header>
-  <h1>Mural de Prompts<small>Análise de Sistemas · prompts salvos pela turma, ao vivo</small></h1>
+  <h1>Mural de Prompts · Fashion Co.<small>Análise de Sistemas · os prompts das coleções, ao vivo</small></h1>
   <div class="status">
     <span id="aovivo" class="aovivo parado">conectando…</span>
     <span class="contador" id="contador">0</span>
   </div>
 </header>
 <div id="aviso" class="aviso-demo" hidden></div>
-<nav id="filtros" aria-label="Filtrar por categoria"></nav>
+<nav id="filtros" aria-label="Filtrar por coleção"></nav>
 <main id="mural" aria-live="polite"></main>
 <footer>
-  <p>Para salvar, diga ao Claude: <em>"salva esse prompt na categoria ___"</em></p>
+  <p>Para salvar, diga ao Claude: <em>"salva esse prompt na coleção ___"</em></p>
   <div class="qr"><span>Como conectar<br>o seu Claude</span><div id="qr"></div></div>
 </footer>
 
@@ -133,6 +138,8 @@
   const aovivo = document.getElementById("aovivo");
 
   let prompts = [];
+  let nomes = new Map(); // id da coleção → nome ("verao-2027" → "Verão 2027")
+  const nomeDa = (id) => nomes.get(id) || id;
   let filtro = "todas";
   const vistos = new Set();
   const ocultos = new Set(JSON.parse(lerArmazenado() || "[]"));
@@ -154,30 +161,33 @@
     return data.toLocaleDateString("pt-BR");
   }
 
+  // O {{look}} em destaque: é onde a peça muda quando o prompt é reusado (H03).
+  function destacarLook(t) { return escapar(t).replace(/\{\{\s*look\s*\}\}/g, "<mark>{{look}}</mark>"); }
+
   function visiveis() { return prompts.filter((p) => !p.oculto && !ocultos.has(p.id)); }
 
   function desenharFiltros() {
     const cont = new Map();
-    for (const p of visiveis()) cont.set(p.categoria, (cont.get(p.categoria) || 0) + 1);
+    for (const p of visiveis()) cont.set(p.colecao, (cont.get(p.colecao) || 0) + 1);
     const cats = [...cont.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     if (filtro !== "todas" && !cont.has(filtro)) filtro = "todas";
     const botao = (valor, rotulo, n) =>
       `<button type="button" data-cat="${escapar(valor)}" aria-pressed="${filtro === valor}">${escapar(rotulo)}<span>${n}</span></button>`;
-    filtros.innerHTML = botao("todas", "Todas", visiveis().length) + cats.map(([c, n]) => botao(c, c, n)).join("");
+    filtros.innerHTML = botao("todas", "Todas", visiveis().length) + cats.map(([c, n]) => botao(c, nomeDa(c), n)).join("");
   }
 
   function desenharMural() {
-    const lista = visiveis().filter((p) => filtro === "todas" || p.categoria === filtro);
+    const lista = visiveis().filter((p) => filtro === "todas" || p.colecao === filtro);
     contador.textContent = visiveis().length;
     if (lista.length === 0) {
       mural.innerHTML = `<div class="vazio"><strong>Nenhum prompt ainda.</strong>Peça ao Claude para salvar o primeiro.</div>`;
       return;
     }
     mural.innerHTML = lista.map((p) => `
-      <article class="cartao${vistos.has(p.id) ? "" : " novo"}">
-        <span class="categoria">${escapar(p.categoria)}</span>
+      <article class="cartao${p.status === "aprovado" ? " aprovado" : ""}${vistos.has(p.id) ? "" : " novo"}">
+        <div class="topo-cartao"><span class="categoria">${escapar(nomeDa(p.colecao))}</span>${p.status === "aprovado" ? '<span class="selo">★ aprovado</span>' : ""}</div>
         <h2 class="titulo">${escapar(p.titulo)}</h2>
-        <p class="texto">${escapar(p.texto)}</p>
+        <p class="texto">${destacarLook(p.texto)}</p>
         <div class="rodape-cartao">
           <span>— ${escapar(p.autor)} · ${haQuanto(p.criadoEm)}</span>
           <button type="button" class="ocultar" data-id="${escapar(p.id)}" title="Ocultar deste mural">ocultar</button>
@@ -229,12 +239,16 @@
     const { initializeApp } = await import(`${SDK}/firebase-app.js`);
     const { getFirestore, collection, query, orderBy, limit, onSnapshot } = await import(`${SDK}/firebase-firestore.js`);
     const db = getFirestore(initializeApp(config));
+    onSnapshot(collection(db, "colecoes"), (snap) => {
+      nomes = new Map(snap.docs.map((d) => [d.id, d.data().nome]));
+      redesenhar();
+    });
     const q = query(collection(db, "prompts"), orderBy("criadoEm", "desc"), limit(200));
     let primeira = true;
     onSnapshot(q, (snap) => {
       prompts = snap.docs.map((d) => {
         const x = d.data();
-        return { id: d.id, titulo: x.titulo, texto: x.texto, categoria: x.categoria, autor: x.autor || "anônimo", oculto: !!x.oculto, criadoEm: x.criadoEm?.toDate?.() || new Date() };
+        return { id: d.id, titulo: x.titulo, texto: x.texto, colecao: x.colecao, status: x.status, autor: x.autor || "anônimo", oculto: !!x.oculto, criadoEm: x.criadoEm?.toDate?.() || new Date() };
       });
       if (primeira) { prompts.forEach((p) => vistos.add(p.id)); primeira = false; }
       aovivo.textContent = "ao vivo";
@@ -253,14 +267,15 @@
     aviso.textContent = "Modo de demonstração: este mural não está no Firebase Hosting, então mostra exemplos. Publique com firebase deploy para ver os prompts reais.";
     aovivo.textContent = "demonstração";
     const agora = Date.now();
+    nomes = new Map([["verao-2027", "Verão 2027"], ["inverno-2027", "Inverno 2027"]]);
     const ex = [
-      ["estudo", "Resumo para revisão", "Resuma o texto abaixo em 5 tópicos para eu revisar antes da prova. Use linguagem simples e destaque os conceitos que mais caem.\n{{texto}}", "rafa", 1],
-      ["codigo", "Revisor de código Python", "Revise este código Python. Aponte bugs, trechos difíceis de ler e o que você mudaria, em ordem de importância.", "lu", 4],
-      ["requisitos", "De história a critério de aceite", "Transforme esta história de usuário em 3 critérios de aceite no formato Dado/Quando/Então:\n{{historia}}", "gui.s", 7],
-      ["criatividade", "Nomes para o projeto", "Sugira 10 nomes curtos para um app que organiza prompts. Explique em uma linha o porquê de cada um.", "anônimo", 12],
-      ["estudo", "Explique como para alguém de 12 anos", "Explique o conceito de {{conceito}} como se eu tivesse 12 anos, com um exemplo do dia a dia.", "bia", 20],
+      ["verao-2027", "aprovado", "Editorial de praia", "Foto editorial de moda, luz natural de fim de tarde numa praia. A modelo veste {{look}}. Enquadramento de corpo inteiro, fundo desfocado.", "rafa", 2],
+      ["verao-2027", "rascunho", "Fundo de estúdio", "Foto de estúdio com fundo cinza claro e luz difusa. A modelo veste {{look}}, de frente, olhando para a câmera.", "lu", 6],
+      ["verao-2027", "rascunho", "Detalhe do tecido", "Close macro de {{look}}, mostrando a trama do tecido e as costuras. Luz lateral suave.", "gui.s", 11],
+      ["inverno-2027", "aprovado", "Lookbook na neve", "Lookbook de inverno numa rua com neve, ao entardecer. A modelo veste {{look}}, caminhando em direção à câmera.", "bia", 18],
+      ["inverno-2027", "rascunho", "Vitrine da loja", "Manequim numa vitrine iluminada à noite, vestindo {{look}}. Reflexos da rua no vidro.", "anônimo", 25],
     ];
-    prompts = ex.map(([categoria, titulo, texto, autor, min], i) => ({ id: "demo" + i, categoria, titulo, texto, autor, oculto: false, criadoEm: new Date(agora - min * 60000) }));
+    prompts = ex.map(([colecao, status, titulo, texto, autor, min], i) => ({ id: "demo" + i, colecao, status, titulo, texto, autor, oculto: false, criadoEm: new Date(agora - min * 60000) }));
     prompts.forEach((p) => vistos.add(p.id));
     redesenhar();
   }

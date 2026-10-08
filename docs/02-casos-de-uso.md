@@ -1,42 +1,52 @@
 # 2. Diagrama de casos de uso
 
-O GitHub desenha os diagramas abaixo automaticamente (Mermaid). Mermaid não tem um tipo "caso de uso" oficial, então usamos um fluxograma com a mesma convenção: atores à esquerda, casos de uso (elipses) dentro da fronteira do sistema.
+Do editor de moda ao engenheiro. O GitHub desenha o diagrama abaixo automaticamente (Mermaid). Mermaid não tem um tipo "caso de uso" oficial, então usamos um fluxograma com a mesma convenção: atores fora, casos de uso dentro da fronteira do sistema.
 
 ```mermaid
 flowchart LR
-    Estudante(["👤 Estudante"])
-    Claude(["🤖 Claude<br/>(ator-sistema)"])
-    Professor(["👤 Professor"])
+    Editor(["👤 Editor de moda"])
+    Chefe(["👤 Editor-chefe"])
+    Eng(["👤 Equipe de engenharia"])
+    Claude(["🤖 Claude<br/>«ator-sistema»"])
 
-    subgraph Sistema["Gerenciador de Prompts"]
-        UC1(("Salvar prompt"))
-        UC2(("Listar categorias"))
-        UC3(("Buscar prompts"))
-        UC4(("Obter prompt<br/>em .prompt"))
-        UC5(("Ver mural"))
-        UC6(("Ocultar prompt"))
+    subgraph Sistema["Gerenciador de Prompts · Fashion Co."]
+        UC1(("Salvar prompt<br/>da coleção"))
+        UC2(("Buscar por<br/>coleção"))
+        UC3(("Reusar trocando<br/>os looks"))
+        UC4(("Aprovar prompt<br/>padrão"))
+        UC5(("Publicar a partir<br/>de .prompt"))
     end
 
-    Estudante -- pede em linguagem natural --> Claude
-    Claude --> UC1
+    Editor -- pede --> Claude
+    Chefe -- pede --> Claude
+    Claude -- escolhe a ferramenta --> UC1
     Claude --> UC2
     Claude --> UC3
     Claude --> UC4
-    Estudante --> UC5
-    Professor --> UC5
-    Professor --> UC6
+    Eng --> UC5
 ```
 
-## Ponto para discussão
+**Cada caso de uso ataca uma dor** (ver `01-requisitos.md`):
 
-O estudante **não** chama o sistema diretamente: ele conversa com o Claude, e o Claude decide qual ferramenta usar. Por isso o Claude aparece como **ator-sistema**. Esse é um caso clássico da UML: um ator não precisa ser uma pessoa, pode ser outro sistema.
+| Caso de uso | Dor que resolve | Ferramenta |
+|---|---|---|
+| Salvar prompt da coleção | Prompts soltos | `salvar_prompt` |
+| Buscar por coleção | Prompts soltos | `buscar_prompts`, `listar_colecoes` |
+| Reusar trocando os looks | Muita refação | `reusar_prompt` |
+| Aprovar prompt padrão | Falta de padrão | `aprovar_prompt` |
+| Publicar a partir de .prompt | O padrão chega à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
 
-## Especificação resumida: "Salvar prompt"
+## Ponto para discussão: o Claude como ator-sistema
+
+O editor **não** chama o sistema diretamente: ele conversa com o Claude, e o Claude escolhe qual ferramenta usar. Por isso o Claude aparece como **ator-sistema**. É um caso clássico da UML: um ator não precisa ser uma pessoa, pode ser outro sistema.
+
+## Especificação resumida: "Reusar trocando os looks"
 
 | Campo | Descrição |
 |---|---|
-| Ator principal | Claude (a pedido do estudante) |
-| Pré-condição | O conector está adicionado à conta do estudante |
-| Fluxo principal | 1. Estudante escreve "salva esse prompt na categoria X". 2. Claude chama `salvar_prompt`. 3. Sistema valida e grava. 4. Sistema devolve o id. 5. Claude confirma ao estudante. 6. O prompt aparece no mural. |
-| Fluxo alternativo | 3a. Texto acima de 4.000 caracteres: o sistema recusa e explica o motivo. |
-| Pós-condição | Prompt gravado e visível no mural |
+| Ator principal | Claude, a pedido do editor de moda |
+| Pré-condição | Existe um prompt salvo com `{{look}}` no texto |
+| Fluxo principal | 1. O editor pede: "usa o prompt do editorial de praia para estes looks: vestido midi verde-oliva de linho, conjunto de alfaiataria areia". 2. O Claude chama `reusar_prompt` com o id e a lista de looks. 3. O sistema troca o `{{look}}` por cada peça e registra os looks na coleção. 4. O sistema devolve um prompt pronto por look. 5. O Claude mostra os prompts para a IA de imagem. |
+| Fluxo alternativo | 3a. O prompt não tem `{{look}}`: o sistema recusa e sugere salvar uma versão com `{{look}}` no lugar da peça. |
+| Fluxo alternativo | 4a. O prompt ainda é rascunho: o sistema gera os looks, mas avisa que ele não é o padrão aprovado. |
+| Pós-condição | Looks registrados na coleção, prontos para a entrega à engenharia |

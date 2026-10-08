@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Conectar o Claude</title>
+<title>Conectar o Claude · Fashion Co.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -39,7 +39,7 @@
 </head>
 <body>
 <main>
-  <h1>Conecte o seu Claude ao mural</h1>
+  <h1>Conecte o seu Claude ao mural da Fashion Co.</h1>
   <p class="sub">Leva dois minutos. Depois disso, é só pedir ao Claude para salvar um prompt.</p>
   <ol>
     <li>
@@ -52,20 +52,21 @@
     </li>
     <li>
       <strong>Dê um nome e cole esta URL</strong>
-      Nome: <b>Mural de Prompts</b>
+      Nome: <b>Prompts Fashion Co.</b>
       <div class="url"><code id="url">…</code><button type="button" id="copiar">Copiar</button></div>
     </li>
     <li>
       <strong>Volte para o app e peça</strong>
       O conector aparece sozinho no app. Mande um prompt e diga:
-      <div class="frase">"salva esse prompt na categoria estudo, meu apelido é ___"</div>
+      <div class="frase">"salva esse prompt na coleção Verão 2027, meu apelido é ___"</div>
+      Dica: escreva <b>{{look}}</b> onde a peça muda. Assim o prompt pode ser reusado na coleção inteira.
     </li>
   </ol>
   <div class="nota">
     <strong>Antes de salvar:</strong> tudo aparece num mural projetado em sala. Use um apelido e não coloque nome completo, telefone, e-mail ou documentos.
     No plano gratuito do Claude dá para ter um conector personalizado.
   </div>
-  <p class="nota">Para ver os prompts da turma: <a href="./">abrir o mural</a>.</p>
+  <p class="nota">Para ver os prompts das coleções: <a href="./">abrir o mural</a>. A Fashion Co. é uma marca fictícia, criada para a aula.</p>
 </main>
 <script>
   const url = new URL("mcp", location.href).href;
