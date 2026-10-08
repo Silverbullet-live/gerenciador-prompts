@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mural de Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #F6F4EF;
+    --cartao: #FFFFFF;
+    --tinta: #1B2233;
+    --tinta-suave: #5B6170;
+    --linha: #DEDAD1;
+    --marinho: #202C46;
+    --azul: #2E7E8C;
+    --azul-claro: #DCEFF2;
+    --alerta: #B4532A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 28px 40px 16px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--marinho);
+  }
+  h1 { font-size: clamp(28px, 3.2vw, 48px); font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+  h1 small { display: block; font-size: 0.42em; font-weight: 500; color: var(--tinta-suave); letter-spacing: 0; margin-top: 4px; }
+  .status { display: flex; align-items: center; gap: 18px; font-size: 20px; color: var(--tinta-suave); }
+  .aovivo { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--azul); }
+  .aovivo::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--azul); animation: pulso 1.6s infinite; }
+  .aovivo.parado { color: var(--alerta); }
+  .aovivo.parado::before { background: var(--alerta); animation: none; }
+  @keyframes pulso { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .contador { font-family: "IBM Plex Mono", monospace; font-size: 28px; color: var(--tinta); }
+  nav { padding: 16px 40px; display: flex; gap: 10px; flex-wrap: wrap; }
+  nav button {
+    font: inherit; font-size: 18px; padding: 8px 18px; border-radius: 999px;
+    border: 1.5px solid var(--linha); background: transparent; color: var(--tinta); cursor: pointer;
+  }
+  nav button[aria-pressed="true"] { background: var(--marinho); border-color: var(--marinho); color: #fff; }
+  nav button span { font-family: "IBM Plex Mono", monospace; opacity: 0.7; margin-left: 6px; }
+  main {
+    flex: 1;
+    padding: 8px 40px 32px;
+    columns: 340px;
+    column-gap: 24px;
+  }
+  .cartao {
+    break-inside: avoid;
+    background: var(--cartao);
+    border: 1px solid var(--linha);
+    border-left: 6px solid var(--azul);
+    border-radius: 6px;
+    padding: 20px 22px 16px;
+    margin: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cartao.novo { animation: chegada 0.9s ease-out; }
+  @keyframes chegada { from { background: var(--azul-claro); transform: translateY(-8px); } to { background: var(--cartao); transform: none; } }
+  .categoria { font-size: 15px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--azul); }
+  .titulo { font-size: 24px; font-weight: 600; line-height: 1.25; margin: 0; }
+  .texto {
+    font-family: "IBM Plex Mono", monospace; font-size: 17px; line-height: 1.5; color: #333A48;
+    white-space: pre-wrap; word-break: break-word; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .rodape-cartao { display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: var(--tinta-suave); }
+  .ocultar {
+    font: inherit; font-size: 14px; border: none; background: none; color: var(--tinta-suave);
+    cursor: pointer; padding: 4px 6px; border-radius: 4px; opacity: 0.55;
+  }
+  .ocultar:hover { opacity: 1; background: #F1ECE4; color: var(--alerta); }
+  .vazio { column-span: all; text-align: center; padding: 80px 20px; color: var(--tinta-suave); font-size: 24px; }
+  .vazio strong { display: block; color: var(--tinta); font-size: 32px; margin-bottom: 12px; }
+  footer {
+    position: sticky; bottom: 0;
+    background: var(--marinho); color: #fff;
+    padding: 18px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  footer p { margin: 0; font-size: clamp(18px, 1.7vw, 26px); line-height: 1.35; }
+  footer em { font-style: normal; font-family: "IBM Plex Mono", monospace; color: #9FD3DC; }
+  .qr { display: flex; align-items: center; gap: 14px; font-size: 16px; color: #C9D2E3; text-align: right; }
+  .qr div { background: #fff; padding: 6px; border-radius: 4px; line-height: 0; }
+  .qr svg { width: 104px; height: 104px; }
+  .aviso-demo { background: #FFF3D6; color: #6B4A00; padding: 10px 40px; font-size: 16px; }
+  @media (max-width: 700px) {
+    header, nav, main, footer { padding-left: 16px; padding-right: 16px; }
+    footer { flex-direction: column; align-items: flex-start; }
+    .qr { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mural de Prompts<small>Análise de Sistemas · prompts salvos pela turma, ao vivo</small></h1>
+  <div class="status">
+    <span id="aovivo" class="aovivo parado">conectando…</span>
+    <span class="contador" id="contador">0</span>
+  </div>
+</header>
+<div id="aviso" class="aviso-demo" hidden></div>
+<nav id="filtros" aria-label="Filtrar por categoria"></nav>
+<main id="mural" aria-live="polite"></main>
+<footer>
+  <p>Para salvar, diga ao Claude: <em>"salva esse prompt na categoria ___"</em></p>
+  <div class="qr"><span>Como conectar<br>o seu Claude</span><div id="qr"></div></div>
+</footer>
+
+<!-- qrcode-generator 1.4.4 (MIT, Kazuhiko Arase), copiado localmente para não depender de CDN em sala -->
+<script src="qrcode.js"></script>
+<script type="module">
+  const SDK = "https://www.gstatic.com/firebasejs/13.0.0";
+  const mural = document.getElementById("mural");
+  const filtros = document.getElementById("filtros");
+  const contador = document.getElementById("contador");
+  const aovivo = document.getElementById("aovivo");
+
+  let prompts = [];
+  let filtro = "todas";
+  const vistos = new Set();
+  const ocultos = new Set(JSON.parse(lerArmazenado() || "[]"));
+
+  function lerArmazenado() { try { return localStorage.getItem("mural-ocultos"); } catch { return null; } }
+  function gravarOcultos() { try { localStorage.setItem("mural-ocultos", JSON.stringify([...ocultos])); } catch {} }
+
+  function escapar(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function haQuanto(data) {
+    const s = Math.max(0, Math.round((Date.now() - data.getTime()) / 1000));
+    if (s < 45) return "agora";
+    const m = Math.round(s / 60);
+    if (m < 60) return `há ${m} min`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `há ${h} h`;
+    return data.toLocaleDateString("pt-BR");
+  }
+
+  function visiveis() { return prompts.filter((p) => !p.oculto && !ocultos.has(p.id)); }
+
+  function desenharFiltros() {
+    const cont = new Map();
+    for (const p of visiveis()) cont.set(p.categoria, (cont.get(p.categoria) || 0) + 1);
+    const cats = [...cont.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    if (filtro !== "todas" && !cont.has(filtro)) filtro = "todas";
+    const botao = (valor, rotulo, n) =>
+      `<button type="button" data-cat="${escapar(valor)}" aria-pressed="${filtro === valor}">${escapar(rotulo)}<span>${n}</span></button>`;
+    filtros.innerHTML = botao("todas", "Todas", visiveis().length) + cats.map(([c, n]) => botao(c, c, n)).join("");
+  }
+
+  function desenharMural() {
+    const lista = visiveis().filter((p) => filtro === "todas" || p.categoria === filtro);
+    contador.textContent = visiveis().length;
+    if (lista.length === 0) {
+      mural.innerHTML = `<div class="vazio"><strong>Nenhum prompt ainda.</strong>Peça ao Claude para salvar o primeiro.</div>`;
+      return;
+    }
+    mural.innerHTML = lista.map((p) => `
+      <article class="cartao${vistos.has(p.id) ? "" : " novo"}">
+        <span class="categoria">${escapar(p.categoria)}</span>
+        <h2 class="titulo">${escapar(p.titulo)}</h2>
+        <p class="texto">${escapar(p.texto)}</p>
+        <div class="rodape-cartao">
+          <span>— ${escapar(p.autor)} · ${haQuanto(p.criadoEm)}</span>
+          <button type="button" class="ocultar" data-id="${escapar(p.id)}" title="Ocultar deste mural">ocultar</button>
+        </div>
+      </article>`).join("");
+    lista.forEach((p) => vistos.add(p.id));
+  }
+
+  function redesenhar() { desenharFiltros(); desenharMural(); }
+
+  filtros.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-cat]");
+    if (!b) return;
+    filtro = b.dataset.cat;
+    redesenhar();
+  });
+
+  // RF07: moderação. Oculta o cartão desta projeção (fica guardado neste navegador).
+  mural.addEventListener("click", (e) => {
+    const b = e.target.closest("button.ocultar");
+    if (!b) return;
+    ocultos.add(b.dataset.id);
+    gravarOcultos();
+    redesenhar();
+  });
+
+  setInterval(desenharMural, 30000);
+
+  // QR code para a página de instruções
+  try {
+    const qr = qrcode(0, "M");
+    qr.addData(new URL("conectar.html", location.href).href);
+    qr.make();
+    document.getElementById("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  } catch {
+    document.querySelector(".qr").hidden = true;
+  }
+
+  // RF05: tempo real. O Firebase Hosting serve a configuração do projeto em /__/firebase/init.json.
+  async function iniciar() {
+    let config;
+    try {
+      const r = await fetch("/__/firebase/init.json");
+      if (!r.ok) throw new Error();
+      config = await r.json();
+    } catch {
+      return modoDemonstracao();
+    }
+    const { initializeApp } = await import(`${SDK}/firebase-app.js`);
+    const { getFirestore, collection, query, orderBy, limit, onSnapshot } = await import(`${SDK}/firebase-firestore.js`);
+    const db = getFirestore(initializeApp(config));
+    const q = query(collection(db, "prompts"), orderBy("criadoEm", "desc"), limit(200));
+    let primeira = true;
+    onSnapshot(q, (snap) => {
+      prompts = snap.docs.map((d) => {
+        const x = d.data();
+        return { id: d.id, titulo: x.titulo, texto: x.texto, categoria: x.categoria, autor: x.autor || "anônimo", oculto: !!x.oculto, criadoEm: x.criadoEm?.toDate?.() || new Date() };
+      });
+      if (primeira) { prompts.forEach((p) => vistos.add(p.id)); primeira = false; }
+      aovivo.textContent = "ao vivo";
+      aovivo.classList.remove("parado");
+      redesenhar();
+    }, () => {
+      aovivo.textContent = "sem conexão";
+      aovivo.classList.add("parado");
+    });
+  }
+
+  // Aberto fora do Firebase Hosting: mostra exemplos para conferir o visual.
+  function modoDemonstracao() {
+    const aviso = document.getElementById("aviso");
+    aviso.hidden = false;
+    aviso.textContent = "Modo de demonstração: este mural não está no Firebase Hosting, então mostra exemplos. Publique com firebase deploy para ver os prompts reais.";
+    aovivo.textContent = "demonstração";
+    const agora = Date.now();
+    const ex = [
+      ["estudo", "Resumo para revisão", "Resuma o texto abaixo em 5 tópicos para eu revisar antes da prova. Use linguagem simples e destaque os conceitos que mais caem.\n{{texto}}", "rafa", 1],
+      ["codigo", "Revisor de código Python", "Revise este código Python. Aponte bugs, trechos difíceis de ler e o que você mudaria, em ordem de importância.", "lu", 4],
+      ["requisitos", "De história a critério de aceite", "Transforme esta história de usuário em 3 critérios de aceite no formato Dado/Quando/Então:\n{{historia}}", "gui.s", 7],
+      ["criatividade", "Nomes para o projeto", "Sugira 10 nomes curtos para um app que organiza prompts. Explique em uma linha o porquê de cada um.", "anônimo", 12],
+      ["estudo", "Explique como para alguém de 12 anos", "Explique o conceito de {{conceito}} como se eu tivesse 12 anos, com um exemplo do dia a dia.", "bia", 20],
+    ];
+    prompts = ex.map(([categoria, titulo, texto, autor, min], i) => ({ id: "demo" + i, categoria, titulo, texto, autor, oculto: false, criadoEm: new Date(agora - min * 60000) }));
+    prompts.forEach((p) => vistos.add(p.id));
+    redesenhar();
+  }
+
+  iniciar();
+</script>
+</body>
+</html>

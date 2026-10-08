@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conectar o Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --papel: #F6F4EF; --tinta: #1B2233; --suave: #5B6170; --linha: #DEDAD1; --marinho: #202C46; --azul: #2E7E8C; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 18px; line-height: 1.5; }
+  main { max-width: 560px; margin: 0 auto; padding: 28px 16px 48px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 6px; }
+  .sub { color: var(--suave); margin: 0 0 28px; }
+  ol { list-style: none; padding: 0; margin: 0; counter-reset: passo; }
+  li { counter-increment: passo; position: relative; padding: 0 0 22px 52px; border-left: 2px solid var(--linha); margin-left: 17px; }
+  li:last-child { border-left-color: transparent; }
+  li::before {
+    content: counter(passo); position: absolute; left: -18px; top: -2px;
+    width: 34px; height: 34px; border-radius: 50%; background: var(--marinho); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 16px;
+  }
+  li strong { display: block; margin-bottom: 2px; }
+  .url { display: flex; gap: 8px; margin-top: 10px; }
+  .url code {
+    flex: 1; min-width: 0; font-family: "IBM Plex Mono", monospace; font-size: 15px;
+    background: #fff; border: 1px solid var(--linha); border-radius: 6px; padding: 10px 12px; overflow-wrap: anywhere;
+  }
+  .url button {
+    font: inherit; font-size: 16px; font-weight: 600; border: none; border-radius: 6px;
+    background: var(--azul); color: #fff; padding: 0 16px; cursor: pointer;
+  }
+  .frase { font-family: "IBM Plex Mono", monospace; font-size: 16px; background: #fff; border-left: 4px solid var(--azul); padding: 10px 12px; margin-top: 8px; }
+  .nota { margin-top: 28px; padding: 14px 16px; background: #fff; border: 1px solid var(--linha); border-radius: 6px; font-size: 16px; color: var(--suave); }
+  .nota strong { color: var(--tinta); }
+  a { color: var(--azul); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Conecte o seu Claude ao mural</h1>
+  <p class="sub">Leva dois minutos. Depois disso, é só pedir ao Claude para salvar um prompt.</p>
+  <ol>
+    <li>
+      <strong>Abra o claude.ai no navegador</strong>
+      No celular também serve, mas tem que ser pelo navegador: o app não deixa adicionar conectores. Entre com a sua conta.
+    </li>
+    <li>
+      <strong>Vá em Configurações → Conectores</strong>
+      Toque em <b>Adicionar conector personalizado</b>.
+    </li>
+    <li>
+      <strong>Dê um nome e cole esta URL</strong>
+      Nome: <b>Mural de Prompts</b>
+      <div class="url"><code id="url">…</code><button type="button" id="copiar">Copiar</button></div>
+    </li>
+    <li>
+      <strong>Volte para o app e peça</strong>
+      O conector aparece sozinho no app. Mande um prompt e diga:
+      <div class="frase">"salva esse prompt na categoria estudo, meu apelido é ___"</div>
+    </li>
+  </ol>
+  <div class="nota">
+    <strong>Antes de salvar:</strong> tudo aparece num mural projetado em sala. Use um apelido e não coloque nome completo, telefone, e-mail ou documentos.
+    No plano gratuito do Claude dá para ter um conector personalizado.
+  </div>
+  <p class="nota">Para ver os prompts da turma: <a href="./">abrir o mural</a>.</p>
+</main>
+<script>
+  const url = new URL("mcp", location.href).href;
+  document.getElementById("url").textContent = url;
+  document.getElementById("copiar").addEventListener("click", async (e) => {
+    try { await navigator.clipboard.writeText(url); e.target.textContent = "Copiado"; }
+    catch { e.target.textContent = "Selecione e copie"; }
+    setTimeout(() => (e.target.textContent = "Copiar"), 2000);
+  });
+</script>
+</body>
+</html>

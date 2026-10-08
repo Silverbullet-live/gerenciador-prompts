@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// RNF04: o mural só lê; quem grava é o servidor MCP (que usa a conta de
+// serviço do Firebase e não passa por estas regras).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /prompts/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
