@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "SEU-PROJETO-FIREBASE"
+  },
+  "targets": {
+    "SEU-PROJETO-FIREBASE": {
+      "hosting": {
+        "mural": [
+          "SEU-PROJETO-FIREBASE"
+        ]
+      }
+    }
   }
 }

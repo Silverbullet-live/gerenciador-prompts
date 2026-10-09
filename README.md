@@ -104,7 +104,7 @@ Abrindo `mural/index.html` direto no navegador, o mural entra em **modo de demon
    ```bash
    npm install -g firebase-tools
    firebase login
-   cp .firebaserc.exemplo .firebaserc   # troque SEU-PROJETO-FIREBASE pelo id do projeto
+   cp .firebaserc.exemplo .firebaserc   # troque as 3 ocorrências de SEU-PROJETO-FIREBASE pelo id do projeto
    cd functions && npm install && cd ..
    firebase deploy
    ```
