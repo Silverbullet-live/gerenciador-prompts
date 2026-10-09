@@ -14,7 +14,7 @@ flowchart LR
         UC2(("Buscar por<br/>coleção"))
         UC3(("Reusar trocando<br/>os looks"))
         UC4(("Aprovar prompt<br/>padrão"))
-        UC5(("Publicar a partir<br/>de .prompt"))
+        UC5(("Entregar à<br/>engenharia"))
     end
 
     Editor -- pede --> Claude
@@ -34,7 +34,7 @@ flowchart LR
 | Buscar por coleção | Prompts soltos | `buscar_prompts`, `listar_colecoes` |
 | Reusar trocando os looks | Muita refação | `reusar_prompt` |
 | Aprovar prompt padrão | Falta de padrão | `aprovar_prompt` |
-| Publicar a partir de .prompt | O padrão chega à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
+| Entregar à engenharia | O padrão chega à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
 
 ## Ponto para discussão: o Claude como ator-sistema
 

@@ -1,6 +1,6 @@
 # 4. Diagrama de sequência
 
-O caminho de uma frase, do celular ao mural.
+O caminho de uma frase, da conversa ao mural.
 
 ```mermaid
 sequenceDiagram

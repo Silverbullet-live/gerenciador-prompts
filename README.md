@@ -62,7 +62,7 @@ docs/            ← a análise: comece por aqui
   01-requisitos.md            o problema, requisitos funcionais e não funcionais
   02-casos-de-uso.md          casos de uso, com o Claude como ator-sistema
   03-classes.md               Event Storming, modelo de domínio e o desafio das versões
-  04-sequencia.md             o caminho de uma frase, do celular ao mural
+  04-sequencia.md             o caminho de uma frase, da conversa ao mural
   05-historias-de-usuario.md  histórias de usuário, Kanban e desafios
   06-wireframe.md             do wireframe à tela real
 functions/       ← o servidor que conversa com o Claude (TypeScript, Firebase Cloud Functions)
