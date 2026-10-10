@@ -97,11 +97,14 @@ npx @modelcontextprotocol/inspector
 
 Abrindo `mural/index.html` direto no navegador, o mural entra em **modo de demonstração**, com exemplos da Fashion Co.
 
-## Publicar no Firebase
+## Publicar no Firebase (no seu projeto)
 
-1. **Plano Blaze.** Cloud Functions exige o plano Blaze (pago por uso). Para uma turma, o uso fica dentro da cota gratuita, mas o projeto precisa estar nesse plano.
-2. **Firestore.** No console do Firebase, crie o banco Firestore (região sugerida: `southamerica-east1`).
-3. **CLI e projeto:**
+O repositório não aponta para nenhum projeto: o `.firebaserc` fica fora do Git e o mural lê a configuração do próprio Hosting. Cada fork publica no **seu** projeto Firebase.
+
+1. **Projeto.** Crie um projeto no [console do Firebase](https://console.firebase.google.com).
+2. **Plano Blaze.** Cloud Functions exige o plano Blaze (pago por uso), que pede um cartão de crédito cadastrado. Para uma turma, o uso fica dentro da cota gratuita. Sem cartão, fique no "Rodar no seu computador": dá para fazer todos os desafios.
+3. **Firestore.** No console do Firebase, crie o banco Firestore (região sugerida: `southamerica-east1`).
+4. **CLI e projeto:**
    ```bash
    npm install -g firebase-tools
    firebase login
@@ -109,7 +112,8 @@ Abrindo `mural/index.html` direto no navegador, o mural entra em **modo de demon
    cd functions && npm install && cd ..
    firebase deploy
    ```
-4. **Endereços** depois do deploy:
+   Se a CLI disser que a credencial expirou, rode `firebase login --reauth`. Para publicar só uma parte: `firebase deploy --only functions` ou `--only hosting:mural`.
+5. **Endereços** depois do deploy:
    - Mural: `https://SEU-PROJETO.web.app`
    - Conector (MCP): `https://SEU-PROJETO.web.app/mcp`
    - Instruções para a turma: `https://SEU-PROJETO.web.app/conectar.html`
@@ -118,7 +122,7 @@ Abrindo `mural/index.html` direto no navegador, o mural entra em **modo de demon
 
 1. Abra **claude.ai no navegador** (o app de celular não deixa adicionar conectores; depois de adicionado, ele aparece no app).
 2. **Configurações → Conectores → Adicionar conector personalizado.**
-3. Nome: `Prompts Fashion Co.`. URL: `https://SEU-PROJETO.web.app/mcp`.
+3. Nome: `Prompts Fashion Co.`. URL: `https://SEU-PROJETO.web.app/mcp`. A página `conectar.html` do seu deploy já mostra essa URL pronta para copiar.
 4. No app, peça para salvar um prompt.
 
 ## Limites desta versão (de propósito)
@@ -128,7 +132,7 @@ Esta é a versão 1, pensada para uma aula. Ela **não tem login**: qualquer pes
 - O mural é público e projetado: **ninguém deve salvar dados pessoais**.
 - Textos têm até 4.000 caracteres; até 12 looks por pedido; a função tem no máximo 5 instâncias, o que limita abuso e custo.
 - "Ocultar" no mural esconde o cartão daquela tela (moderação da projeção); o dado continua no banco.
-- Depois da aula, apague as coleções do Firestore no console ou desative a função.
+- Se você publicou, apague as coleções do Firestore no console ou desative a função quando não precisar mais dela.
 
 ## Desafios: o projeto é de vocês
 
