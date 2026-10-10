@@ -65,6 +65,7 @@ docs/            ← a análise: comece por aqui
   04-sequencia.md             o caminho de uma frase, da conversa ao mural
   05-historias-de-usuario.md  histórias de usuário, Kanban e desafios
   06-wireframe.md             do wireframe à tela real
+  09-evolucao-pos-release.md  depois do release: monitorar, registrar, classificar e evoluir
 functions/       ← o servidor que conversa com o Claude (TypeScript, Firebase Cloud Functions)
   src/modelo.ts               Coleção, Prompt, Look, Entrega
   src/servidorMcp.ts          as sete ferramentas
@@ -122,7 +123,7 @@ Abrindo `mural/index.html` direto no navegador, o mural entra em **modo de demon
 
 ## Limites desta versão (de propósito)
 
-Esta é a versão 1, pensada para uma aula. Ela **não tem login**: qualquer pessoa com a URL pode salvar, o autor é só um apelido, e qualquer um pode se dizer editor-chefe e aprovar. Esse é o **requisito escondido** discutido em `docs/01-requisitos.md`, e o ponto de partida do desafio v2.
+Esta é a versão 1, pensada para uma aula. Ela **não tem login**: qualquer pessoa com a URL pode salvar, o autor é só um apelido, e qualquer um pode se dizer editor-chefe e aprovar. Esse é o **requisito escondido** discutido em `docs/01-requisitos.md`, e o ponto de partida do desafio v2. Como uma lacuna dessas é observada, registrada e vira a próxima versão está em `docs/09-evolucao-pos-release.md`.
 
 - O mural é público e projetado: **ninguém deve salvar dados pessoais**.
 - Textos têm até 4.000 caracteres; até 12 looks por pedido; a função tem no máximo 5 instâncias, o que limita abuso e custo.
