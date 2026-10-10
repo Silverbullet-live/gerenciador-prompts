@@ -6,7 +6,9 @@
 | Requisitos não funcionais | Restrições do desenho | Tela pensada para o celular · confirmação em até 2 segundos |
 | Casos de uso | Fluxos: telas em sequência | Salvar → buscar → reusar trocando os looks → aprovar → entregar |
 | Modelo de domínio | Conteúdo: cartões, filtros, campos | Coleção → filtro · Prompt → cartão com selo "aprovado" · Look → campo |
-| Histórias de usuário | Roteiro do teste com o usuário | "Encontre o prompt aprovado do verão e troque os looks" |
+| Histórias de usuário | Objetivo → tarefa para testar o protótipo | "Encontre o prompt aprovado do verão e troque os looks" |
+
+A história diz quem precisa de quê e por quê; ela não é o roteiro do teste. Do **objetivo** da história sai uma **tarefa** que o usuário executa no protótipo enquanto você observa. A tarefa do exemplo junta o objetivo de H02 (achar o aprovado da coleção) e o de H03 (trocar os looks), ver `05-historias-de-usuario.md`.
 
 ## Wireframe do mural (baixa fidelidade)
 
@@ -51,4 +53,4 @@ Feito antes de qualquer código, para validar com o "cliente" o que aparece na t
 
 **Rabisque a tela de busca de prompts** que o editor de moda veria se o projeto tivesse um app próprio. Que campos ela tem? Como aparece o prompt aprovado? O que acontece quando a busca não encontra nada?
 
-Depois, faça o teste com um colega usando o roteiro: *"Encontre o prompt aprovado do verão e troque os looks"*. Onde ele travou? Isso é um requisito que faltava.
+Depois, teste com um colega: dê a ele a tarefa *"Encontre o prompt aprovado do verão e troque os looks"* e observe, sem ajudar. Onde ele travou? Isso é um requisito que faltava.
