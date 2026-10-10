@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade · Sequência H01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&display=swap">
+<style>
+  :root{--ink:#1a1a1a;--mute:#5f6672;--navy:#202c46;--accent:#64b0bd;--accent-ink:#2f7d8a;--soft:#eef6f7;--paper:#fff;--stage:#2b2f36;--line:#dadedf}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stage);color:var(--ink);font-family:Barlow,Arial,sans-serif}
+  main{width:min(1120px,calc(100% - 32px));margin:28px auto;background:var(--paper);border-top:8px solid var(--accent);padding:36px 44px 40px}
+  .eyebrow{margin:0 0 12px;color:var(--mute);font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  h1{max-width:820px;margin:0;font-size:42px;line-height:1.1;font-weight:700}
+  .intro{margin:16px 0 28px;color:var(--mute);font-size:23px;line-height:1.35}
+  h2{margin:0 0 14px;font-size:25px;line-height:1.2}
+  .steps{display:grid;gap:10px;margin:0;padding:0;list-style:none;counter-reset:step}
+  .step{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:16px;min-height:76px;padding:12px 14px;border:2px solid var(--line);border-radius:6px;background:var(--paper);cursor:grab;touch-action:pan-y}
+  .step.dragging{opacity:.42;border-color:var(--accent-ink)}
+  .step.over{border-color:var(--accent);background:var(--soft)}
+  .position{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;font-size:20px;font-weight:700}
+  .step p{margin:0;font-size:22px;line-height:1.25}
+  .move-controls{display:flex;gap:8px}
+  button{min-height:42px;padding:8px 13px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--navy);font:600 17px Barlow,Arial,sans-serif;cursor:pointer}
+  button:hover,button:focus-visible{border-color:var(--accent-ink);outline:2px solid transparent;background:var(--soft)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:18px}
+  .primary{border-color:var(--navy);background:var(--navy);color:#fff}
+  .primary:hover,.primary:focus-visible{background:#2d3c5d;color:#fff}
+  .feedback{min-height:30px;margin:12px 0 0;font-size:19px;font-weight:600;color:var(--accent-ink)}
+  .feedback.error{color:#a33828}
+  .feedback a{margin-left:8px;color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
+  .explanation{margin-top:14px;padding:18px 22px;border-left:5px solid var(--accent);background:var(--soft)}
+  .explanation h3{margin:0 0 10px;font-size:21px}
+  .explanation-intro{margin:0 0 10px;font-size:19px;line-height:1.35}
+  .explanation ol{margin:0;padding-left:25px}
+  .explanation li{margin:6px 0;font-size:19px;line-height:1.3}
+  .bonus{margin-top:26px;padding:22px 24px;border-left:6px solid var(--accent);background:var(--soft)}
+  .bonus p{margin:0 0 14px;font-size:21px;line-height:1.35}
+  fieldset{display:grid;gap:8px;margin:0;padding:0;border:0}
+  .choice{display:flex;align-items:flex-start;gap:10px;font-size:20px;line-height:1.3;cursor:pointer}
+  .choice input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent-ink);flex:0 0 auto}
+  @media(max-width:680px){
+    main{margin:12px auto;padding:26px 18px 28px}
+    h1{font-size:34px}
+    .intro{font-size:20px}
+    .step{grid-template-columns:38px 1fr;gap:10px;padding:12px}
+    .step p{font-size:20px}
+    .position{width:34px;height:34px}
+    .move-controls{grid-column:2;justify-content:flex-end}
+    .actions{flex-wrap:wrap}
+    .bonus{padding:18px}
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Modelagem · H01 · 5 minutos</p>
+  <h1>Qual é a ordem do pedido até a confirmação?</h1>
+  <p class="intro">Organize as etapas do salvamento de um prompt, do pedido do editor à confirmação do Claude. Arraste os cartões ou use os botões para movê-los.</p>
+
+  <section aria-labelledby="steps-title">
+    <h2 id="steps-title">Ordene a sequência</h2>
+    <ol class="steps" id="steps" aria-label="Etapas embaralhadas da sequência"></ol>
+    <div class="actions">
+      <button class="primary" id="check-order" type="button">Conferir ordem</button>
+      <button id="reset-order" type="button">Restaurar cartões</button>
+    </div>
+    <p class="feedback" id="order-feedback" aria-live="polite"><span id="order-message"></span><a id="order-explanation-link" href="#sequence-explanation" hidden>Ver por que</a></p>
+    <div class="explanation" id="sequence-explanation" hidden>
+      <h3>Por que a escolha vem antes da chamada?</h3>
+      <p class="explanation-intro">O servidor MCP publica o catálogo de ferramentas disponíveis, com descrições e parâmetros. O Claude usa esse catálogo para escolher a ferramenta; o protocolo MCP transporta a chamada, mas não decide qual ferramenta usar.</p>
+      <ol>
+        <li>O editor faz o pedido ao Claude.</li>
+        <li>O modelo do Claude interpreta a intenção e escolhe <code>salvar_prompt</code> entre as ferramentas anunciadas pelo servidor MCP.</li>
+        <li>O app do Claude, como cliente MCP, envia ao servidor a chamada com título, texto, coleção e autor (opcional).</li>
+        <li>O servidor valida os dados, garante a coleção e grava o prompt.</li>
+        <li>Depois de salvar, o servidor devolve o resultado e o ID.</li>
+        <li>Com o resultado, o Claude confirma o salvamento ao editor.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bonus" aria-labelledby="bonus-title">
+    <h2 id="bonus-title">Bônus · caminho de erro</h2>
+    <p>Se o servidor rejeitar os dados como inválidos, o que acontece em seguida?</p>
+    <fieldset>
+      <label class="choice"><input type="radio" name="bonus" value="save">O servidor salva mesmo assim e corrige os campos automaticamente.</label>
+      <label class="choice"><input type="radio" name="bonus" value="error">O servidor devolve o erro ao Claude; ele explica o que corrigir e o prompt não é salvo.</label>
+      <label class="choice"><input type="radio" name="bonus" value="hide">O Claude confirma o salvamento e o mural oculta o cartão.</label>
+    </fieldset>
+    <div class="actions">
+      <button class="primary" id="check-bonus" type="button">Conferir bônus</button>
+    </div>
+    <p class="feedback" id="bonus-feedback" aria-live="polite"></p>
+  </section>
+</main>
+<script>
+  const initialSteps = [
+    { id: "call", text: "O app do Claude (cliente MCP) envia a chamada com título, texto, coleção e autor (opcional)." },
+    { id: "response", text: "O servidor devolve o resultado do salvamento e o ID do prompt." },
+    { id: "request", text: "O editor pede ao Claude para salvar um prompt na coleção Verão 2027." },
+    { id: "persist", text: "O servidor valida os dados, garante a coleção e grava o prompt." },
+    { id: "confirm", text: "O Claude confirma ao editor que o prompt foi salvo." },
+    { id: "select", text: "O Claude escolhe salvar_prompt entre as ferramentas disponíveis pelo conector MCP." },
+  ];
+  const correctOrder = ["request", "select", "call", "persist", "response", "confirm"];
+  const stepsList = document.getElementById("steps");
+  const orderFeedback = document.getElementById("order-feedback");
+  const orderMessage = document.getElementById("order-message");
+  const orderExplanationLink = document.getElementById("order-explanation-link");
+  const sequenceExplanation = document.getElementById("sequence-explanation");
+  let dragged = null;
+
+  function renderSteps(items) {
+    stepsList.replaceChildren(...items.map((item, index) => {
+      const li = document.createElement("li");
+      li.className = "step";
+      li.draggable = true;
+      li.dataset.id = item.id;
+      const position = document.createElement("span");
+      position.className = "position";
+      position.setAttribute("aria-label", `Posição ${index + 1}`);
+      const content = document.createElement("p");
+      content.textContent = item.text;
+      const controls = document.createElement("div");
+      controls.className = "move-controls";
+      const up = document.createElement("button");
+      up.type = "button";
+      up.textContent = "Subir";
+      up.setAttribute("aria-label", `Mover para cima: ${item.text}`);
+      up.disabled = index === 0;
+      up.addEventListener("click", () => moveItem(item.id, -1));
+      const down = document.createElement("button");
+      down.type = "button";
+      down.textContent = "Descer";
+      down.setAttribute("aria-label", `Mover para baixo: ${item.text}`);
+      down.disabled = index === items.length - 1;
+      down.addEventListener("click", () => moveItem(item.id, 1));
+      controls.append(up, down);
+      li.append(position, content, controls);
+      return li;
+    }));
+    [...stepsList.children].forEach((li, index) => { li.querySelector(".position").textContent = index + 1; });
+  }
+
+  function currentSteps() {
+    const byId = new Map(initialSteps.map((item) => [item.id, item]));
+    return [...stepsList.children].map((li) => byId.get(li.dataset.id));
+  }
+
+  function moveItem(id, delta) {
+    const items = currentSteps();
+    const from = items.findIndex((item) => item.id === id);
+    const to = from + delta;
+    if (to < 0 || to >= items.length) return;
+    [items[from], items[to]] = [items[to], items[from]];
+    renderSteps(items);
+    orderMessage.textContent = "";
+    orderExplanationLink.hidden = true;
+    sequenceExplanation.hidden = true;
+    orderFeedback.classList.remove("error");
+  }
+
+  stepsList.addEventListener("dragstart", (event) => {
+    const li = event.target.closest(".step");
+    if (!li) return;
+    dragged = li;
+    li.classList.add("dragging");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", li.dataset.id);
+  });
+  stepsList.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    const target = event.target.closest(".step");
+    if (!dragged || !target || target === dragged) return;
+    const after = event.clientY > target.getBoundingClientRect().top + target.offsetHeight / 2;
+    stepsList.insertBefore(dragged, after ? target.nextSibling : target);
+    [...stepsList.children].forEach((li, index) => { li.querySelector(".position").textContent = index + 1; });
+  });
+  stepsList.addEventListener("dragend", () => {
+    dragged?.classList.remove("dragging");
+    dragged = null;
+  });
+
+  document.getElementById("check-order").addEventListener("click", () => {
+    const correct = currentSteps().every((item, index) => item.id === correctOrder[index]);
+    orderFeedback.classList.toggle("error", !correct);
+    orderMessage.textContent = correct
+      ? "Sequência correta."
+      : "Ainda não. Repare em quem inicia a chamada, quem valida e quando o Claude recebe o resultado.";
+    orderExplanationLink.hidden = !correct;
+    sequenceExplanation.hidden = true;
+  });
+
+  orderExplanationLink.addEventListener("click", () => { sequenceExplanation.hidden = false; });
+
+  document.getElementById("reset-order").addEventListener("click", () => {
+    renderSteps(initialSteps);
+    orderMessage.textContent = "";
+    orderExplanationLink.hidden = true;
+    sequenceExplanation.hidden = true;
+    orderFeedback.classList.remove("error");
+  });
+
+  document.getElementById("check-bonus").addEventListener("click", () => {
+    const answer = document.querySelector('input[name="bonus"]:checked')?.value;
+    const feedback = document.getElementById("bonus-feedback");
+    const correct = answer === "error";
+    feedback.classList.toggle("error", !correct);
+    feedback.textContent = correct
+      ? "Isso. Sem gravação, não há ID de sucesso nem novo cartão no mural; o Claude explica o erro ao editor."
+      : "Não. Confira o ramo de erro do diagrama: dados inválidos não são gravados; o servidor devolve o motivo ao Claude.";
+  });
+
+  renderSteps(initialSteps);
+</script>
+</body>
+</html>

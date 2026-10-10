@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade · História de usuário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&display=swap">
+<style>
+  :root{--ink:#1a1a1a;--mute:#5f6672;--navy:#202c46;--accent:#64b0bd;--accent-ink:#2f7d8a;--soft:#eef6f7;--paper:#fff;--stage:#2b2f36;--line:#dadedf;--bad:#a33828}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stage);color:var(--ink);font-family:Barlow,Arial,sans-serif}
+  main{width:min(1040px,calc(100% - 32px));margin:28px auto;background:var(--paper);border-top:8px solid var(--accent);padding:36px 44px 40px}
+  .eyebrow{margin:0 0 12px;color:var(--mute);font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  h1{max-width:840px;margin:0;font-size:42px;line-height:1.1;font-weight:700}
+  .intro{margin:16px 0 28px;color:var(--mute);font-size:23px;line-height:1.35}
+  form{display:grid;gap:20px}
+  .field{display:grid;gap:7px}
+  label{font-size:20px;font-weight:700;color:var(--navy)}
+  input{width:100%;min-height:54px;padding:11px 14px;border:2px solid var(--line);border-radius:4px;background:#fff;color:var(--ink);font:21px Barlow,Arial,sans-serif}
+  input:focus{outline:3px solid var(--soft);border-color:var(--accent-ink)}
+  .field small{font-size:17px;line-height:1.3;color:var(--mute)}
+  .preview{margin-top:28px;padding:22px 24px;border-left:7px solid var(--accent);background:var(--soft)}
+  .preview h2{margin:0 0 10px;font-size:21px;letter-spacing:1px;text-transform:uppercase;color:var(--accent-ink)}
+  .story{margin:0;font-size:28px;line-height:1.35;font-weight:600}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:18px}
+  button{min-height:46px;padding:9px 16px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--navy);font:600 18px Barlow,Arial,sans-serif;cursor:pointer}
+  button:hover,button:focus-visible{border-color:var(--accent-ink);outline:2px solid transparent;background:var(--soft)}
+  .primary{border-color:var(--navy);background:var(--navy);color:#fff}
+  .primary:hover,.primary:focus-visible{background:#2d3c5d;color:#fff}
+  .feedback{min-height:28px;margin:12px 0 0;font-size:19px;font-weight:600;color:var(--accent-ink)}
+  .feedback.error{color:var(--bad)}
+  @media(max-width:680px){main{margin:12px auto;padding:26px 18px 28px}h1{font-size:34px}.intro{font-size:20px}.story{font-size:24px}.preview{padding:18px}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Metodologias · 5 minutos</p>
+  <h1>Escreva uma história de usuário.</h1>
+  <p class="intro">Você pode reformular uma história do quadro. Pense em como uma interface melhor ajudaria o editor a encontrar e reutilizar prompts. Diga quem precisa de algo, o que quer fazer e para que isso serve.</p>
+
+  <form id="story-form" novalidate>
+    <div class="field">
+      <label for="role">Como [quem]?</label>
+      <input id="role" name="role" autocomplete="off" placeholder="Um papel, não um nome">
+      <small>Exemplo de papel: editor de moda, editor-chefe, engenheiro.</small>
+    </div>
+    <div class="field">
+      <label for="need">Quero [o quê]?</label>
+      <input id="need" name="need" autocomplete="off" placeholder="O que a pessoa quer fazer">
+    </div>
+    <div class="field">
+      <label for="benefit">Para [por quê]?</label>
+      <input id="benefit" name="benefit" autocomplete="off" placeholder="O benefício que isso traz">
+    </div>
+  </form>
+
+  <section class="preview" aria-labelledby="preview-title">
+    <h2 id="preview-title">Sua história</h2>
+    <p class="story" id="story-preview" aria-live="polite">Como [quem], quero [o quê], para [por quê].</p>
+  </section>
+  <div class="actions">
+    <button class="primary" id="check-story" type="button">Conferir estrutura</button>
+    <button id="clear-story" type="button">Limpar</button>
+  </div>
+  <p class="feedback" id="feedback" aria-live="polite"></p>
+</main>
+<script>
+  const fields = [
+    { id: "role", fallback: "[quem]" },
+    { id: "need", fallback: "[o quê]" },
+    { id: "benefit", fallback: "[por quê]" },
+  ];
+  const preview = document.getElementById("story-preview");
+  const feedback = document.getElementById("feedback");
+
+  function updatePreview() {
+    const [role, need, benefit] = fields.map(({ id, fallback }) => document.getElementById(id).value.trim() || fallback);
+    preview.textContent = `Como ${role}, quero ${need}, para ${benefit}.`;
+    feedback.textContent = "";
+    feedback.classList.remove("error");
+  }
+
+  fields.forEach(({ id }) => document.getElementById(id).addEventListener("input", updatePreview));
+
+  document.getElementById("check-story").addEventListener("click", () => {
+    const missing = fields.some(({ id }) => !document.getElementById(id).value.trim());
+    feedback.classList.toggle("error", missing);
+    feedback.textContent = missing
+      ? "Complete os três campos para formar a história."
+      : "Os três campos estão preenchidos. A página não avalia se a história é inédita ou se a solução é adequada; discuta com o grupo se o benefício importa para o usuário.";
+  });
+
+  document.getElementById("clear-story").addEventListener("click", () => {
+    document.getElementById("story-form").reset();
+    updatePreview();
+    document.getElementById("role").focus();
+  });
+</script>
+</body>
+</html>

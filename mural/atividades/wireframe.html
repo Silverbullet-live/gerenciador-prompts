@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade · Wireframe do mural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{--ink:#111;--muted:#626262;--line:#111;--paper:#fff;--stage:#ececec;--soft:#f5f5f5;--focus:#444}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stage);color:var(--ink);font-family:Barlow,Arial,sans-serif}
+  button{font:600 16px Barlow,Arial,sans-serif;color:var(--ink);background:var(--paper);border:1.5px solid var(--ink);border-radius:2px;min-height:42px;padding:8px 12px;cursor:pointer}
+  button:hover,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .workspace{width:min(1440px,calc(100% - 32px));min-height:min(880px,calc(100vh - 32px));margin:16px auto;background:var(--paper);border:1.5px solid var(--ink);display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+  header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 24px;border-bottom:1.5px solid var(--ink)}
+  .brand{display:flex;align-items:center;gap:14px;min-width:0}
+  .mark{width:34px;height:34px;border:2px solid var(--ink);display:grid;place-items:center;font:500 17px "IBM Plex Mono",monospace;flex:none}
+  .brand h1{margin:0;font-size:22px;line-height:1.1}
+  .brand p{margin:3px 0 0;color:var(--muted);font-size:15px}
+  .task{margin:0;padding:12px 24px;border-bottom:1.5px solid var(--ink);font-size:18px;line-height:1.35}
+  .task strong{font-weight:700}
+  .body{display:grid;grid-template-columns:minmax(0,1fr) 280px;min-height:0}
+  .stage{padding:24px;min-width:0}
+  .stage-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+  .stage-top h2,.panel h2{margin:0;font-size:17px;letter-spacing:1.5px;text-transform:uppercase}
+  .stage-actions{display:flex;gap:8px}
+  .canvas{min-height:510px;height:100%;padding:18px;border:1.5px dashed var(--ink);background:var(--paper);display:flex;flex-direction:column;gap:12px;transition:background .15s}
+  .canvas.over{background:var(--soft)}
+  .canvas-empty{margin:auto;max-width:300px;color:var(--muted);text-align:center;font-size:18px;line-height:1.4;pointer-events:none}
+  .canvas-item{position:relative;border:1.5px solid var(--ink);padding:12px 14px;background:var(--paper);cursor:grab;touch-action:pan-y}
+  .canvas-item.dragging{opacity:.4}
+  .canvas-item.over{outline:2px dashed var(--ink);outline-offset:2px}
+  .item-tools{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity .12s}
+  .canvas-item:hover .item-tools,.canvas-item:focus-within .item-tools{opacity:1;pointer-events:auto}
+  .item-tools button{min-height:30px;padding:3px 8px;font-size:14px;background:var(--paper)}
+  .wire-header{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:48px}
+  .wire-title{font-size:21px;font-weight:700}
+  .wire-subtitle{font-size:15px;color:var(--muted)}
+  .wire-filters{display:flex;flex-wrap:wrap;gap:8px}
+  .wire-chip{border:1px solid var(--ink);padding:5px 12px;font-size:16px}
+  .wire-search{min-height:44px;border:1px solid var(--ink);display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:16px;color:var(--muted)}
+  .wire-search::before{content:"";width:13px;height:13px;border:1.5px solid var(--ink);border-radius:50%;display:inline-block}
+  .wire-search::after{content:"";position:absolute;width:6px;height:1.5px;background:var(--ink);transform:translate(10px,8px) rotate(45deg)}
+  .wire-card{display:grid;gap:10px}
+  .wire-card-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .wire-card-title{font-size:19px;font-weight:700}
+  .wire-badge{border:1px solid var(--ink);padding:3px 8px;font:500 12px "IBM Plex Mono",monospace}
+  .wire-meta{font:14px "IBM Plex Mono",monospace;color:var(--muted)}
+  .wire-lines{display:grid;gap:6px}
+  .wire-lines i{height:7px;background:var(--ink);display:block;max-width:100%;opacity:.8}
+  .wire-lines i:nth-child(2){max-width:88%}.wire-lines i:nth-child(3){max-width:65%}
+  .wire-empty{text-align:center;padding:12px}
+  .wire-empty strong{display:block;margin-bottom:5px;font-size:18px}
+  .wire-empty span{font-size:15px;color:var(--muted)}
+  .panel{padding:22px 18px;border-left:1.5px solid var(--ink);background:var(--soft)}
+  .panel-intro{margin:7px 0 16px;color:var(--muted);font-size:15px;line-height:1.3}
+  .palette{display:grid;gap:8px}
+  .palette-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;border:1px solid var(--ink);background:var(--paper);cursor:grab;touch-action:pan-y}
+  .palette-item p{margin:0;font-size:16px;font-weight:600}
+  .palette-item small{display:block;color:var(--muted);font-size:13px;font-weight:400}
+  .palette-item button{min-height:34px;padding:5px 9px;font-size:14px;flex:none}
+  .note{margin:16px 0 0;padding-top:12px;border-top:1px solid var(--ink);font-size:15px;line-height:1.35}
+  footer{padding:12px 24px;border-top:1.5px solid var(--ink);display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:14px}
+  .status{color:var(--ink);font-weight:600}
+  @media(max-width:760px){
+    .workspace{width:100%;min-height:100vh;margin:0;border:0;grid-template-rows:auto auto 1fr auto}
+    header{padding:14px 16px}.brand h1{font-size:20px}
+    .body{grid-template-columns:1fr;grid-template-rows:1fr auto}
+    .stage{padding:16px}.canvas{min-height:390px}
+    .panel{border-left:0;border-top:1.5px solid var(--ink);padding:14px 16px}
+    .palette{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .palette-item{align-items:flex-start;flex-direction:column}
+    .palette-item button{width:100%}
+    .item-tools{position:static;justify-content:flex-end;margin:-4px -6px 4px;opacity:1;pointer-events:auto}
+    footer{padding:10px 16px}
+  }
+  @media(hover:none){.item-tools{position:static;justify-content:flex-end;margin:-4px -6px 4px;opacity:1;pointer-events:auto}}
+  @media(max-width:420px){.stage-top{align-items:flex-start;flex-direction:column}.stage-actions{width:100%}.stage-actions button{flex:1}.palette{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="workspace">
+  <header>
+    <div class="brand"><span class="mark" aria-hidden="true">FC</span><div><h1>Fashion Co.</h1><p>Wireframe de baixa fidelidade · busca de prompts</p></div></div>
+    <button id="clear" type="button">Limpar tela</button>
+  </header>
+  <p class="task"><strong>Tarefa:</strong> o editor quer encontrar o prompt aprovado do Verão 2027 e conferir se é o certo para reutilizar.</p>
+  <div class="body">
+    <section class="stage" aria-labelledby="canvas-heading">
+      <div class="stage-top"><h2 id="canvas-heading">Sua tela</h2><div class="stage-actions"><button id="preview-task" type="button">Testar tarefa</button></div></div>
+      <div class="canvas" id="canvas" aria-label="Prancheta do wireframe" aria-live="polite">
+        <p class="canvas-empty" id="empty-message">Arraste componentes até aqui ou use Adicionar no painel.</p>
+      </div>
+    </section>
+    <aside class="panel" aria-labelledby="palette-heading">
+      <h2 id="palette-heading">Componentes</h2>
+      <p class="panel-intro">Arraste para a tela ou toque em Adicionar. Reorganize os blocos; cada botão representa um componente possível.</p>
+      <div class="palette" id="palette"></div>
+      <p class="note" id="task-feedback" aria-live="polite">Monte a tela pensando no que o editor precisa localizar e verificar.</p>
+    </aside>
+  </div>
+  <footer><span>Protótipo de papel · só estrutura e hierarquia</span><span class="status" id="status" aria-live="polite">0 componentes</span></footer>
+</div>
+<script>
+  const components = [
+    {id:"header",name:"Cabeçalho",detail:"marca e título",html:'<div class="wire-header"><div><div class="wire-title">Mural de Prompts</div><div class="wire-subtitle">Fashion Co. · coleções</div></div><span class="wire-meta">AO VIVO</span></div>'},
+    {id:"filters",name:"Coleções",detail:"filtros rápidos",html:'<div class="wire-filters"><span class="wire-chip">Todas</span><span class="wire-chip">Verão 2027</span><span class="wire-chip">Inverno 2027</span></div>'},
+    {id:"search",name:"Busca",detail:"campo de pesquisa",html:'<div class="wire-search">Buscar por título ou palavra...</div>'},
+    {id:"prompt",name:"Prompt aprovado",detail:"cartão com status",html:'<div class="wire-card"><div class="wire-card-top"><span class="wire-card-title">Editorial de praia</span><span class="wire-badge">APROVADO</span></div><div class="wire-meta">VERÃO 2027 · rafa</div><div class="wire-lines" aria-label="Trecho do prompt"><i></i><i></i><i></i></div><div class="wire-meta">{{look}} · Abrir para reutilizar</div></div>'},
+    {id:"empty",name:"Sem resultados",detail:"estado vazio",html:'<div class="wire-empty"><strong>Nenhum prompt encontrado</strong><span>Experimente outra coleção ou palavra.</span></div>'},
+  ];
+  const palette=document.getElementById("palette");
+  const canvas=document.getElementById("canvas");
+  const emptyMessage=document.getElementById("empty-message");
+  const status=document.getElementById("status");
+  const taskFeedback=document.getElementById("task-feedback");
+  let draggedPaletteId=null;
+  let draggedCanvasItem=null;
+  let nextItemId=0;
+
+  function updateStatus(){
+    const count=canvas.querySelectorAll(".canvas-item").length;
+    status.textContent=`${count} ${count===1?"componente":"componentes"}`;
+    emptyMessage.hidden=count>0;
+  }
+
+  function addComponent(id,before=null){
+    const component=components.find((item)=>item.id===id);
+    if(!component)return;
+    const item=document.createElement("article");
+    item.className="canvas-item";
+    item.draggable=true;
+    item.dataset.component=id;
+    item.dataset.itemId=String(++nextItemId);
+    const markup=document.createElement("div");
+    markup.innerHTML=component.html;
+    item.append(markup.firstElementChild);
+    const tools=document.createElement("div");
+    tools.className="item-tools";
+    const up=document.createElement("button");
+    up.type="button";up.textContent="↑";up.title="Mover para cima";up.setAttribute("aria-label",`Mover ${component.name} para cima`);
+    up.addEventListener("click",()=>{const previous=item.previousElementSibling;if(previous)canvas.insertBefore(item,previous);});
+    const down=document.createElement("button");
+    down.type="button";down.textContent="↓";down.title="Mover para baixo";down.setAttribute("aria-label",`Mover ${component.name} para baixo`);
+    down.addEventListener("click",()=>{const next=item.nextElementSibling;if(next)canvas.insertBefore(next,item);});
+    const remove=document.createElement("button");
+    remove.type="button";remove.textContent="×";remove.title="Remover componente";remove.setAttribute("aria-label",`Remover ${component.name}`);
+    remove.addEventListener("click",()=>{item.remove();updateStatus();});
+    tools.append(up,down,remove);
+    item.append(tools);
+    if(before)canvas.insertBefore(item,before);else canvas.append(item);
+    updateStatus();
+  }
+
+  for(const component of components){
+    const entry=document.createElement("div");
+    entry.className="palette-item";entry.draggable=true;entry.dataset.component=component.id;
+    const description=document.createElement("p");description.textContent=component.name;
+    const small=document.createElement("small");small.textContent=component.detail;description.append(small);
+    const add=document.createElement("button");add.type="button";add.textContent="Adicionar";add.setAttribute("aria-label",`Adicionar ${component.name}`);
+    add.addEventListener("click",()=>addComponent(component.id));
+    entry.append(description,add);palette.append(entry);
+  }
+
+  palette.addEventListener("dragstart",(event)=>{
+    const entry=event.target.closest(".palette-item");if(!entry)return;
+    draggedPaletteId=entry.dataset.component;
+    event.dataTransfer.effectAllowed="copy";event.dataTransfer.setData("text/plain",draggedPaletteId);
+  });
+  palette.addEventListener("dragend",()=>{draggedPaletteId=null;});
+  canvas.addEventListener("dragstart",(event)=>{
+    const item=event.target.closest(".canvas-item");if(!item)return;
+    draggedCanvasItem=item;item.classList.add("dragging");
+    event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",item.dataset.itemId);
+  });
+  canvas.addEventListener("dragover",(event)=>{
+    event.preventDefault();
+    const target=event.target.closest(".canvas-item");
+    if(draggedPaletteId){
+      canvas.classList.add("over");
+      if(target)target.classList.add("over");
+      return;
+    }
+    if(!draggedCanvasItem||!target||target===draggedCanvasItem)return;
+    const after=event.clientY>target.getBoundingClientRect().top+target.offsetHeight/2;
+    canvas.insertBefore(draggedCanvasItem,after?target.nextSibling:target);
+  });
+  canvas.addEventListener("drop",(event)=>{
+    event.preventDefault();
+    const target=event.target.closest(".canvas-item");
+    if(draggedPaletteId){addComponent(draggedPaletteId,target);taskFeedback.textContent="Bloco adicionado. Organize a hierarquia para ajudar a encontrar e conferir o prompt.";}
+    canvas.classList.remove("over");canvas.querySelectorAll(".over").forEach((item)=>item.classList.remove("over"));
+  });
+  canvas.addEventListener("dragend",()=>{
+    draggedCanvasItem?.classList.remove("dragging");draggedCanvasItem=null;
+    canvas.classList.remove("over");canvas.querySelectorAll(".over").forEach((item)=>item.classList.remove("over"));
+  });
+
+  document.getElementById("clear").addEventListener("click",()=>{
+    canvas.querySelectorAll(".canvas-item").forEach((item)=>item.remove());
+    taskFeedback.textContent="Monte a tela pensando no que o editor precisa localizar e verificar.";
+    updateStatus();
+  });
+  document.getElementById("preview-task").addEventListener("click",()=>{
+    const placed=new Set([...canvas.querySelectorAll(".canvas-item")].map((item)=>item.dataset.component));
+    const missing=[];
+    if(!placed.has("filters"))missing.push("um filtro de coleção");
+    if(!placed.has("search"))missing.push("um campo de busca");
+    if(!placed.has("prompt"))missing.push("um cartão que mostre o prompt aprovado");
+    taskFeedback.textContent=missing.length
+      ? `Para cumprir a tarefa, considere incluir ${missing.join(", ")}. Isso é uma pista, não uma nota.`
+      : "A tela já oferece coleção, busca e cartão aprovado. Peça a um colega para encontrar o prompt e dizer como o reutilizaria.";
+  });
+  updateStatus();
+</script>
+</body>
+</html>
