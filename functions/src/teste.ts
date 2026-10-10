@@ -112,6 +112,21 @@ try {
   assert.match(textoDe(cedo), /ainda não tem prompt aprovado/);
   console.log("✓ não entrega coleção sem prompt aprovado");
 
+  const promptSemLooks = textoDe(
+    await chamar("salvar_prompt", {
+      titulo: "Editorial de outono",
+      texto: "Editorial com {{look}} em cenário urbano.",
+      colecao: "Outono 2027",
+      autor: "rafa",
+    }),
+  );
+  const idPromptSemLooks = promptSemLooks.match(/id (\S+)/)?.[1]!;
+  await chamar("aprovar_prompt", { id: idPromptSemLooks, aprovadoPor: "chefe.ana" });
+  const semLooks = await chamar("entregar_colecao", { colecao: "Outono 2027", recebidoPor: "eng.joao" });
+  assert.equal(semLooks.isError, true);
+  assert.match(textoDe(semLooks), /ainda não tem looks gerados/);
+  console.log("✓ não registra entrega sem looks gerados");
+
   // H04 · aprovar prompt padrão (um só por coleção)
   assert.match(textoDe(await chamar("aprovar_prompt", { id: idSemLook, aprovadoPor: "chefe.ana" })), /agora é o prompt aprovado/);
   const troca = textoDe(await chamar("aprovar_prompt", { id, aprovadoPor: "chefe.ana" }));

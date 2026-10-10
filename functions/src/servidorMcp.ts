@@ -218,7 +218,7 @@ export function criarServidorMcp(repo: Repositorio): McpServer {
     {
       title: "Entregar coleção à engenharia",
       description:
-        "Monta a entrega da coleção para a equipe de engenharia: o prompt aprovado em .prompt e os looks gerados a partir dele. Registra a entrega.",
+        "Monta a entrega da coleção para a equipe de engenharia: o prompt aprovado em .prompt e ao menos um look gerado a partir dele. Exige um prompt aprovado e looks gerados antes de registrar a entrega.",
       inputSchema: {
         colecao: nomeDeColecao.describe("A coleção a entregar"),
         recebidoPor: apelido.describe("Quem recebe na engenharia"),
@@ -232,15 +232,17 @@ export function criarServidorMcp(repo: Repositorio): McpServer {
         return erro(`A coleção "${colecao}" ainda não tem prompt aprovado. O editor-chefe precisa aprovar um antes da entrega.`);
       }
       const looks = await repo.looksDoPrompt(aprovado.id);
+      // A entrega representa um pacote efetivamente enviado, então exige ao menos um look.
+      if (looks.length === 0) {
+        return erro(`A coleção "${colecao}" ainda não tem looks gerados. Use reusar_prompt antes de entregar à engenharia.`);
+      }
       const entrega = await repo.registrarEntrega({
         colecao: id,
         promptId: aprovado.id,
         looks: looks.map((l) => l.id),
         recebidoPor: recebidoPor.trim(),
       });
-      const listaDeLooks = looks.length
-        ? looks.map((l) => `• ${l.peca}${l.corETecido ? ` (${l.corETecido})` : ""}`).join("\n")
-        : "(nenhum look gerado ainda: use reusar_prompt)";
+      const listaDeLooks = looks.map((l) => `• ${l.peca}${l.corETecido ? ` (${l.corETecido})` : ""}`).join("\n");
       return texto(
         `Entrega ${entrega.id} registrada para ${entrega.recebidoPor}.\n\n` +
           `Arquivo: ${nomeDoArquivo(aprovado)}\n\n${paraDotprompt(aprovado)}\n` +

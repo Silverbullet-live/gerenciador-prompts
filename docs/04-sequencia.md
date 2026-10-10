@@ -1,6 +1,8 @@
 # 4. Diagrama de sequência
 
-O caminho de uma frase, da conversa ao mural.
+**H01 · Salvar um prompt:** o caminho de uma frase, da conversa ao mural.
+
+Esta é só a sequência de salvar. Reusar, aprovar e entregar têm sequências próprias (a de aprovar é a pergunta 4).
 
 ```mermaid
 sequenceDiagram
@@ -12,7 +14,7 @@ sequenceDiagram
 
     E->>C: "salva esse prompt na coleção Verão 2027"
     C->>C: escolhe salvar_prompt
-    C->>S: salvar_prompt(título, texto, coleção, apelido)
+    C->>S: salvar_prompt(título, texto, coleção, autor?)
     S->>S: valida (tamanho, campos obrigatórios)
     alt dados válidos
         S->>DB: grava a coleção (se for nova) e o prompt

@@ -49,6 +49,7 @@ classDiagram
     }
     class Entrega {
         +Date data
+        +string promptId
         +string[] looks
         +string recebidoPor
     }
@@ -57,17 +58,20 @@ classDiagram
         rascunho
         aprovado
     }
-    Colecao "1" --> "N" Prompt
-    Prompt "1" --> "N" Look : gera
-    Look "N" --> "1" Entrega : vai em
+    Colecao "1" --> "0..N" Prompt
+    Prompt "1" --> "0..N" Look : gera
+    Prompt "1" --> "0..N" Entrega : aprovado em
+    Entrega "0..1" --> "1..N" Look : inclui
     Prompt ..> StatusDoPrompt
 ```
 
 O `texto` do prompt usa `{{look}}` onde a peça muda. O código desse modelo está em [`functions/src/modelo.ts`](../functions/src/modelo.ts).
+Uma entrega associa um prompt aprovado e **um ou mais looks**; cada look pode estar sem entrega ou pertencer a uma única entrega. `imagemGerada` existe no modelo, mas não é preenchida na v1.
 
 ### Decisões de projeto para discutir
 
 - **Um só aprovado por coleção.** Aprovar um prompt devolve o antigo padrão a rascunho. É uma regra de negócio, não uma limitação técnica.
+- **Uma entrega precisa conter ao menos um look.** Sem looks gerados, o sistema não registra a entrega para engenharia.
 - **O `{{look}}` é uma variável.** O mesmo prompt gera um look por peça, e na exportação `.prompt` ele vira a entrada declarada (`input.schema`).
 - **`versao` existe, mas é sempre 1.** O campo está no modelo para o desafio da v3.
 - **`imagemGerada` existe, mas a v1 não preenche.** Gerar a imagem é trabalho da IA de imagem, fora deste sistema.

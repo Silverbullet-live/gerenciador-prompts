@@ -6,8 +6,8 @@ Do editor de moda ao engenheiro. O GitHub desenha o diagrama abaixo automaticame
 flowchart LR
     Editor(["👤 Editor de moda"])
     Chefe(["👤 Editor-chefe"])
-    Eng(["👤 Equipe de engenharia"])
-    Claude(["🤖 Claude<br/>«ator-sistema»"])
+    Eng(["👤 Equipe de engenharia · destinatária"])
+    Claude(["🤖 Claude<br/>sistema externo"])
 
     subgraph Sistema["Gerenciador de Prompts · Fashion Co."]
         UC1(("Salvar prompt<br/>da coleção"))
@@ -23,7 +23,8 @@ flowchart LR
     Claude --> UC2
     Claude --> UC3
     Claude --> UC4
-    Eng --> UC5
+    Claude --> UC5
+    UC5 -. entrega o pacote .-> Eng
 ```
 
 **Cada caso de uso ataca uma dor** (ver `01-requisitos.md`):
@@ -35,6 +36,8 @@ flowchart LR
 | Reusar trocando os looks | Muita refação | `reusar_prompt` |
 | Aprovar prompt padrão | Falta de padrão | `aprovar_prompt` |
 | Entregar à engenharia | O padrão chega à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
+
+A entrega exige um prompt aprovado e ao menos um look gerado. A equipe de engenharia recebe o pacote; quem solicita a ação é o editor via Claude.
 
 ## Ponto para discussão: o Claude como ator-sistema
 

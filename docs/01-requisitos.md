@@ -39,7 +39,7 @@ Três dores aparecem:
 | RF03 | Mostrar no mural os prompts salvos, do mais novo para o mais antigo. | mural |
 | RF04 | Reusar um prompt trocando só os looks (o `{{look}}` do texto). | `reusar_prompt` |
 | RF05 | O editor-chefe aprova o prompt padrão de cada coleção (um só por coleção). | `aprovar_prompt` |
-| RF06 | Entregar à engenharia o prompt aprovado em `.prompt` e os looks gerados. | `obter_prompt`, `entregar_colecao` |
+| RF06 | Entregar à engenharia o prompt aprovado em `.prompt` e ao menos um look gerado. | `obter_prompt`, `entregar_colecao` |
 
 ## Requisitos não funcionais (como o sistema se comporta)
 
