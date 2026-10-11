@@ -27,7 +27,7 @@ Três dores aparecem:
 |---|---|
 | Editor de moda | Salvar, encontrar e reusar os prompts de cada coleção sem sair da conversa com o Claude |
 | Editor-chefe | Garantir a qualidade: aprovar o prompt padrão de cada coleção |
-| Equipe de engenharia | Receber o prompt aprovado num formato de mercado, e não por WhatsApp |
+| Equipe de engenharia | Receber a imagem aprovada de cada look e o prompt aprovado num formato de mercado (`.prompt`), e não por WhatsApp |
 | Claude (ator-sistema) | Ferramentas com nomes e parâmetros claros, para saber quando usar cada uma |
 
 ## Requisitos funcionais (o que o sistema faz)
