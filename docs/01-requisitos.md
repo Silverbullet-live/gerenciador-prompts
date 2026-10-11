@@ -54,7 +54,7 @@ Três dores aparecem:
 | RNF05 | Disponibilidade | Hospedagem gerenciada (Firebase), sem servidor para manter ligado. |
 | RNF06 | Privacidade | Nesta versão não há login: o autor é só um apelido. **Ninguém deve salvar dados pessoais.** |
 
-## Ninguém entrega os requisitos prontos: elicitação de requisitos
+## Ninguém entrega os requisitos prontos: levantamento de requisitos
 
 | Técnica | Na aula |
 |---|---|
