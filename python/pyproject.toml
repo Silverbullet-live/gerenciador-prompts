@@ -1,7 +1,7 @@
 [project]
 name = "gerenciador-prompts"
 version = "0.1.0"
-description = "Gerenciador de Prompts da Fashion Co. em Python (porte do servidor MCP)"
+description = "Servidor MCP do Gerenciador de Prompts da Fashion Co."
 readme = "README.md"
 authors = [
     { name = "brevvi", email = "brevvi@gmail.com" }
