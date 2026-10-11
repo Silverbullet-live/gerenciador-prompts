@@ -5,8 +5,22 @@ A análise respondeu **o que** o sistema faz (requisitos, casos de uso, modelo d
 | Fase | Pergunta | Produto |
 |---|---|---|
 | **Análise** | O que o sistema faz? | Requisitos, casos de uso e modelo de domínio (`01` a `04`) |
-| **Projeto** | Como vamos construir? | Arquitetura (as peças e como conversam) e as decisões técnicas (este documento) |
+| **Projeto** | Como vamos construir? | As decisões técnicas e a arquitetura que sai delas (este documento) |
 | **Implementação** | Construir e testar | Código (`functions/src`, `mural/`) e testes (`teste.ts`) |
+
+## Decisões técnicas
+
+Toda decisão tem alternativas e consequências. Registrar o porquê, antes de codar, é o que em inglês se chama **ADR** (*Architecture Decision Record*): quem chegar depois entende a escolha em vez de adivinhá-la.
+
+| Decisão | Escolha | Alternativas | Por quê | Consequência |
+|---|---|---|---|---|
+| **Integração** | Conector MCP | App ou site próprio | O editor já trabalha no Claude; MCP é o padrão aberto, criado pela Anthropic, para ligar ferramentas a assistentes | Exige um servidor na internet; o usuário precisa de um cliente MCP (Claude ou outro) |
+| **Plataforma** | Firebase (Functions, Firestore, Hosting) | Servidor próprio, Cloud Run, Vercel | Sem servidor para manter (RNF05); hospedagem e banco no mesmo lugar; cota gratuita cobre uma turma | Functions exige o plano Blaze (cartão cadastrado); dependência do Google |
+| **Linguagem** | TypeScript | Python | O SDK oficial do MCP em TypeScript é a implementação de referência; o mural já é JavaScript, então uma linguagem só; tipos pegam erros antes de rodar | Quem programa só em Python precisa aprender; Python também atenderia (SDK `mcp`, Functions em Python) |
+| **Banco** | Firestore | PostgreSQL ou outro SQL | Avisa o mural em tempo real (RNF01); sem servidor; documentos simples | Não busca por trecho de texto: a busca filtra os 500 prompts mais recentes em memória; sem *joins* |
+| **Formato** | Dotprompt (`.prompt`) | JSON, texto puro | Padrão de mercado do Firebase Genkit (RNF03); o `{{look}}` vira entrada declarada | A engenharia precisa conhecer o formato |
+
+As decisões vêm depois dos requisitos e **moldam a arquitetura**: o desenho abaixo já mostra Firebase, Firestore e TypeScript porque essas escolhas foram feitas antes. A linguagem não é ponto de partida: é uma decisão como as outras, e poderia ser outra.
 
 ## Arquitetura: as peças e como elas conversam
 
@@ -55,19 +69,6 @@ flowchart LR
 **A decisão mais importante do desenho:** o servidor não sabe qual banco usa. Ele conversa com a interface `Repositorio`. Por isso os testes rodam sem Firebase, e trocar o banco não mexe nas ferramentas.
 
 **O que fica fora do sistema:** a conversa (Claude) e a geração da imagem (IA de imagem). O sistema guarda e entrega; não gera.
-
-## Decisões técnicas
-
-Toda decisão tem alternativas e consequências. Registrar o porquê, antes de codar, é o que em inglês se chama **ADR** (*Architecture Decision Record*): quem chegar depois entende a escolha em vez de adivinhá-la.
-
-| Decisão | Escolha | Alternativas | Por quê | Consequência |
-|---|---|---|---|---|
-| **Plataforma** | Firebase (Functions, Firestore, Hosting) | Servidor próprio, Cloud Run, Vercel | Sem servidor para manter (RNF05); hospedagem e banco no mesmo lugar; cota gratuita cobre uma turma | Functions exige o plano Blaze (cartão cadastrado); dependência do Google |
-| **Linguagem** | TypeScript | Python | O SDK oficial do MCP em TypeScript é a implementação de referência; o mural já é JavaScript, então uma linguagem só; tipos pegam erros antes de rodar | Quem programa só em Python precisa aprender; Python também atenderia (SDK `mcp`, Functions em Python) |
-| **Banco** | Firestore | PostgreSQL ou outro SQL | Avisa o mural em tempo real (RNF01); sem servidor; documentos simples | Não busca por trecho de texto: a busca filtra os 500 prompts mais recentes em memória; sem *joins* |
-| **Formato** | Dotprompt (`.prompt`) | JSON, texto puro | Padrão de mercado do Firebase Genkit (RNF03); o `{{look}}` vira entrada declarada | A engenharia precisa conhecer o formato |
-
-A linguagem é uma **decisão de projeto**, não um ponto de partida: ela vem depois dos requisitos e da arquitetura, e poderia ser outra.
 
 ## Perguntas para a turma
 
