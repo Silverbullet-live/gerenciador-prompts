@@ -66,7 +66,7 @@ classDiagram
 ```
 
 O `texto` do prompt usa `{{look}}` onde a peça muda. O código desse modelo está em [`functions/src/modelo.ts`](../functions/src/modelo.ts).
-Uma entrega associa um prompt aprovado e **um ou mais looks**; cada look pode estar sem entrega ou pertencer a uma única entrega. `imagemGerada` existe no modelo, mas não é preenchida na v1.
+Uma entrega associa um prompt aprovado e **um ou mais looks**; cada look pode estar sem entrega ou pertencer a uma única entrega. `imagemGerada` existe no modelo, mas não é preenchida na v1: é a lacuna do RF06 (issue #5).
 
 ### Decisões de projeto para discutir
 
@@ -74,7 +74,7 @@ Uma entrega associa um prompt aprovado e **um ou mais looks**; cada look pode es
 - **Uma entrega precisa conter ao menos um look.** Sem looks gerados, o sistema não registra a entrega para engenharia.
 - **O `{{look}}` é uma variável.** O mesmo prompt gera um look por peça, e na exportação `.prompt` ele vira a entrada declarada (`input.schema`).
 - **`versao` existe, mas é sempre 1.** O campo está no modelo para o desafio da v3.
-- **`imagemGerada` existe, mas a v1 não preenche.** Gerar a imagem é trabalho da IA de imagem, fora deste sistema.
+- **`imagemGerada` existe, mas a v1 não preenche.** Gerar a imagem é trabalho da IA de imagem, fora deste sistema. Guardar a imagem que o editor aprovou e entregá-la à engenharia é trabalho dele (RF06): a v1 ainda não faz isso (issue #5).
 
 ## Desafio v3: versões de cada prompt (H06)
 

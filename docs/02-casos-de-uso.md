@@ -35,9 +35,9 @@ flowchart LR
 | Buscar por coleção | Prompts soltos | `buscar_prompts`, `listar_colecoes` |
 | Reusar trocando os looks | Muita refação | `reusar_prompt` |
 | Aprovar prompt padrão | Falta de padrão | `aprovar_prompt` |
-| Entregar à engenharia | O padrão chega à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
+| Entregar à engenharia | As imagens aprovadas chegam à engenharia sem WhatsApp | `obter_prompt`, `entregar_colecao` |
 
-A entrega exige um prompt aprovado e ao menos um look gerado. A equipe de engenharia recebe o pacote; quem solicita a ação é o editor via Claude.
+A entrega exige um prompt aprovado e ao menos um look gerado. A equipe de engenharia recebe o pacote; quem solicita a ação é o editor via Claude. O pacote deveria levar a imagem aprovada de cada look (RF06); na v1 ele leva o `.prompt` e a lista de looks, sem as imagens (issue #5).
 
 ## Ponto para discussão: o Claude como ator-sistema
 

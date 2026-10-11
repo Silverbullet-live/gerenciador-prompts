@@ -10,7 +10,7 @@ Formato: **Como** [quem], **quero** [o quê], **para** [por quê].
 | H02 | Como editor de moda, quero buscar prompts por coleção, para reaproveitar o que já funcionou. | A busca devolve título, coleção, autor e trecho; dá para pedir só o aprovado. | `buscar_prompts` |
 | H03 | Como editor de moda, quero reusar um prompt trocando só os looks, para não reescrever tudo a cada coleção. | Para cada look informado, o sistema devolve o prompt com o `{{look}}` preenchido. | `reusar_prompt` |
 | H04 | Como editor-chefe, quero aprovar o prompt padrão de cada coleção, para manter a qualidade das imagens. | O prompt ganha o selo "aprovado" no mural; só há um aprovado por coleção. | `aprovar_prompt` |
-| H05 | Como engenheiro, quero receber os prompts aprovados em arquivo `.prompt`, para não depender de mensagens no WhatsApp. | A entrega traz o `.prompt` aprovado e a lista de looks, e fica registrada. | `entregar_colecao` |
+| H05 | Como engenheiro, quero receber a imagem aprovada de cada look, com o prompt em `.prompt`, para publicar exatamente o que o editor aprovou, sem depender de WhatsApp. | A entrega traz a imagem aprovada de cada look e o `.prompt` aprovado, e fica registrada. Na v1, só o `.prompt` e a lista de looks (issue #5). | `entregar_colecao` |
 | H06 | Como editor de moda, quero criar uma nova versão de um prompt sem apagar a anterior, para comparar as coleções. | Desafio v3 (ver `03-classes.md`). | — |
 
 ## O quadro da aula
@@ -21,7 +21,7 @@ Assim o quadro estava no meio da sprint, como aparece na apresentação:
 |---|---|---|---|
 | H05, H06 | H04 | H03 | H01, H02 |
 
-Neste repositório, **H01 a H05 já estão entregues** (rode `npm test` para ver cada uma funcionando). H06 fica para vocês.
+Neste repositório, **H01 a H04 já estão entregues** (rode `npm test` para ver cada uma funcionando). **H05 está parcial:** a entrega leva o `.prompt` e os looks, mas ainda não as imagens aprovadas (issue #5). H06 fica para vocês.
 
 ## Desafios para depois da aula
 

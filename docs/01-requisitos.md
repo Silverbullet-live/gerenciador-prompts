@@ -2,7 +2,7 @@
 
 ## O problema
 
-Você é editor de moda da **Fashion Co.** e precisa organizar as trocas de coleção do ano. Elas acontecem **4 vezes por ano**, e a cada troca você escreve **prompts complexos** para gerar as imagens com as roupas da coleção e envia os novos looks para a **equipe de engenharia**.
+Você é editor de moda da **Fashion Co.** e precisa organizar as trocas de coleção do ano. Elas acontecem **4 vezes por ano**, e a cada troca você escreve **prompts complexos** para gerar as imagens com as roupas da coleção, aprova as que atendem ao padrão e envia **as imagens aprovadas** dos novos looks para a **equipe de engenharia**, que as publica.
 
 Três dores aparecem:
 
@@ -39,7 +39,9 @@ Três dores aparecem:
 | RF03 | Mostrar no mural os prompts salvos, do mais novo para o mais antigo. | mural |
 | RF04 | Reusar um prompt trocando só os looks (o `{{look}}` do texto). | `reusar_prompt` |
 | RF05 | O editor-chefe aprova o prompt padrão de cada coleção (um só por coleção). | `aprovar_prompt` |
-| RF06 | Entregar à engenharia o prompt aprovado em `.prompt` e ao menos um look gerado. | `obter_prompt`, `entregar_colecao` |
+| RF06 | Entregar à engenharia a imagem aprovada pelo editor de cada look (ao menos um), com o prompt aprovado em `.prompt`. A engenharia publica essas imagens: não gera outras. | `entregar_colecao` (parcial na v1: ver abaixo) |
+
+**RF06 na v1:** a entrega leva o `.prompt` aprovado e a lista de looks, mas **ainda não as imagens aprovadas**: a imagem é gerada no Claude, pela IA de imagem, e o sistema não recebe o arquivo. Sem a imagem, a engenharia teria de gerar outra a partir do prompt, e a qualidade aprovada pelo editor se perde. Registrado na issue #5.
 
 ## Requisitos não funcionais (como o sistema se comporta)
 

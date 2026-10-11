@@ -8,7 +8,7 @@ Projeto-base da aula de **Análise de Sistemas**: a análise primeiro, o código
 
 ## O case
 
-Você é editor de moda da Fashion Co. e precisa organizar as **quatro trocas de coleção do ano**. A cada troca, escreve prompts complexos para gerar as imagens das roupas e envia os novos looks para a equipe de engenharia. Hoje os prompts ficam soltos (no chat, em notas, no WhatsApp), cada editor reescreve o mesmo prompt trocando só os looks, e a qualidade varia de coleção para coleção.
+Você é editor de moda da Fashion Co. e precisa organizar as **quatro trocas de coleção do ano**. A cada troca, escreve prompts complexos para gerar as imagens das roupas, aprova as que atendem ao padrão e envia as imagens aprovadas dos novos looks para a equipe de engenharia. Hoje os prompts ficam soltos (no chat, em notas, no WhatsApp), cada editor reescreve o mesmo prompt trocando só os looks, e a qualidade varia de coleção para coleção.
 
 A solução é um gerenciador de prompts: o mesmo cuidado que se tem com código (organizar, versionar, aprovar), agora com prompts.
 
@@ -30,7 +30,7 @@ O Claude chama a ferramenta certa do conector, o prompt vai para o Firestore e a
 | `reusar_prompt` | Gera um prompt por look, trocando o `{{look}}` pela peça | H03 |
 | `aprovar_prompt` | O editor-chefe aprova o prompt padrão da coleção (um só por coleção) | H04 |
 | `obter_prompt` | Devolve um prompt no formato `.prompt` | publicar |
-| `entregar_colecao` | Entrega à engenharia o `.prompt` aprovado e os looks gerados | H05 |
+| `entregar_colecao` | Entrega à engenharia o `.prompt` aprovado e os looks gerados (as imagens aprovadas ainda não: issue #5) | H05 |
 
 Exemplo de um `.prompt` exportado:
 

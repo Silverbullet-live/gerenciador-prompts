@@ -56,7 +56,7 @@ Depois de classificar, **priorize** pelo impacto e pela urgência e leve ao Kanb
 ## Exemplos reais deste projeto
 
 **Defeito.** `entregar_colecao` registrava uma entrega mesmo sem nenhum look gerado.
-- Requisito: RF06, entregar à engenharia o prompt aprovado **e os looks gerados**.
+- Requisito: RF06, entregar à engenharia a imagem aprovada **de cada look**, com o prompt aprovado.
 - Passos: aprovar um prompt que nunca foi reusado e pedir a entrega da coleção.
 - Esperado: recusar, porque não há o que entregar. Observado: entrega registrada, vazia.
 - Correção: a ferramenta passou a recusar, e um teste em `functions/src/teste.ts` garante a regra.
