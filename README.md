@@ -65,6 +65,7 @@ docs/            ← a análise: comece por aqui
   04-sequencia.md             o caminho de uma frase, da conversa ao mural
   05-historias-de-usuario.md  histórias de usuário, Kanban e desafios
   06-wireframe.md             do wireframe à tela real
+  07-projeto.md               projeto: arquitetura (mapa das peças) e decisões técnicas
   09-evolucao-pos-release.md  depois do release: monitorar, registrar, classificar e evoluir
 functions/       ← o servidor que conversa com o Claude (TypeScript, Firebase Cloud Functions)
   src/modelo.ts               Coleção, Prompt, Look, Entrega
