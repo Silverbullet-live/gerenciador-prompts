@@ -13,7 +13,7 @@ No VS Code, abra **esta pasta** (`app/python`): o interpretador do `.venv` e os 
 
 ## Como o código é construído: walking skeleton de fatias verticais
 
-**Esqueleto (feito):** `servidor.py` com uma ferramenta, `listar_colecoes`, que devolve uma resposta fixa. Prova que o ambiente roda e que o MCP conecta.
+**Esqueleto:** `servidor.py` com uma ferramenta, `listar_colecoes`, que devolve uma resposta fixa. Prova que o ambiente roda e que o MCP conecta.
 
 **Fatias, uma história por vez** (`../docs/05-historias-de-usuario.md`), cada uma de ponta a ponta: teste → modelo → repositório → ferramenta.
 
