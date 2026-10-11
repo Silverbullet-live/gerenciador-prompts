@@ -1,6 +1,7 @@
 """Modelo de domínio da Fashion Co. (docs/03-classes.md)."""
 
 import unicodedata
+from dataclasses import dataclass
 
 
 def id_da_colecao(nome: str) -> str:
@@ -15,3 +16,14 @@ def id_da_colecao(nome: str) -> str:
     texto = sem_acento
     texto = texto.replace(" ", "-")  # 4. espaços viram hífen
     return texto
+
+
+@dataclass
+class Prompt:
+    """Um prompt de uma coleção (docs/03-classes.md)."""
+
+    titulo: str
+    texto: str
+    colecao: str  # o id da coleção, ex.: "verao-2027"
+    autor: str
+    status: str = "rascunho"  # todo prompt nasce como rascunho

@@ -11,7 +11,7 @@ from mcp.server.mcpserver import MCPServer
 servidor = MCPServer("gerenciador-de-prompts-fashion-co")
 
 
-# Qual é a menor ferramenta possível: listar_colecoes
+# Qual é a ferramenta: listar_colecoes
 @servidor.tool()
 def listar_colecoes() -> str:
     """Lista as coleções da Fashion Co."""
