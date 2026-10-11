@@ -27,6 +27,8 @@ O endereço `/mcp` não é uma página web: aberto direto no navegador, ele resp
 
 Para desligar, `Ctrl+C` nos dois terminais.
 
+**Erros comuns:** `Failed to fetch` quer dizer que o Inspector (terminal 2) foi desligado: rode de novo. `HTTP 401 Unauthorized` quer dizer que a aba do navegador usa o token de uma sessão anterior: o token muda a cada vez que o Inspector sobe, então abra o link novo do terminal.
+
 ## Como o código é construído: walking skeleton de fatias verticais
 
 **Esqueleto:** `servidor.py` com uma ferramenta, `listar_colecoes`, que devolve uma resposta fixa. Prova que o ambiente roda e que o MCP conecta.
