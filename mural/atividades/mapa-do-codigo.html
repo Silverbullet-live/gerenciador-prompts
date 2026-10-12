@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa do código · Gerenciador de Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{--ink:#1a1a1a;--mute:#5f6672;--navy:#202c46;--accent:#64b0bd;--accent-ink:#2f7d8a;--soft:#eef6f7;--paper:#fff;--stage:#2b2f36;--line:#dadedf;--mono:"IBM Plex Mono",ui-monospace,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stage);color:var(--ink);font-family:Barlow,Arial,sans-serif}
+  main{width:min(1120px,calc(100% - 32px));margin:28px auto;background:var(--paper);border-top:8px solid var(--accent);padding:36px 44px 40px}
+  .eyebrow{margin:0 0 12px;color:var(--mute);font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  h1{max-width:860px;margin:0;font-size:40px;line-height:1.1}
+  .intro{margin:16px 0 26px;color:var(--mute);font-size:21px;line-height:1.4}
+  .colunas{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1.25fr);gap:0 8px;margin-bottom:8px;color:var(--mute);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .mapa{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+  .linha{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1.25fr);align-items:center;gap:8px}
+  .seta{text-align:center;color:var(--accent-ink);font-size:28px;font-weight:700}
+  a.artefato{display:block;padding:14px 16px;border:2px solid var(--navy);border-radius:8px;background:var(--soft);color:var(--ink);text-decoration:none}
+  a.artefato b{display:block;font-size:20px}
+  a.artefato span{display:block;margin-top:2px;color:var(--mute);font-size:15px;font-family:var(--mono)}
+  .arquivos{display:flex;flex-wrap:wrap;gap:8px}
+  a.arquivo{display:block;flex:1 1 220px;padding:10px 14px;border:2px solid var(--accent-ink);border-radius:8px;background:#fff;color:var(--ink);text-decoration:none}
+  a.arquivo code{display:block;font-family:var(--mono);font-size:16px;color:var(--accent-ink)}
+  a.arquivo span{display:block;margin-top:3px;font-size:15px;color:var(--mute);line-height:1.3}
+  a.artefato:hover,a.artefato:focus-visible,a.arquivo:hover,a.arquivo:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .nota{margin:26px 0 0;padding:16px 20px;border-left:6px solid var(--accent);background:var(--soft);font-size:18px;line-height:1.4}
+  .nota b{color:var(--navy)}
+  @media(max-width:720px){
+    main{margin:12px auto;padding:24px 16px 28px}
+    h1{font-size:30px}
+    .intro{font-size:18px}
+    .colunas{display:none}
+    .linha{grid-template-columns:1fr;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+    .seta{transform:rotate(90deg);line-height:1;font-size:24px}
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Implementação · o mapa do código</p>
+  <h1>Cada artefato da análise vira arquivos de código.</h1>
+  <p class="intro">Toque num artefato para ler a análise, ou num arquivo para ver o código no GitHub. Ninguém começa um arquivo do zero: ele já foi pensado num artefato.</p>
+
+  <div class="colunas" aria-hidden="true"><div>Artefato da análise</div><div></div><div>Arquivos de código</div></div>
+  <ul class="mapa" id="mapa"></ul>
+
+  <p class="nota"><b>Por onde começar:</b> o walking skeleton cria só o <code>servidorMcp.ts</code>, com uma ferramenta que devolve uma resposta fixa. Depois, cada fatia (uma história de usuário) soma um pedaço do modelo, do repositório e do teste.</p>
+</main>
+<script>
+  const GH = "https://github.com/brevvi/gerenciador-prompts/blob/main/";
+  const mapa = [
+    { artefato: "Casos de uso", doc: "docs/02-casos-de-uso.md",
+      arquivos: [["functions/src/servidorMcp.ts", "as 7 ferramentas que o Claude pode chamar"]] },
+    { artefato: "Modelo de domínio", doc: "docs/03-classes.md",
+      arquivos: [["functions/src/modelo.ts", "Coleção, Prompt, Look, Entrega e as regras"]] },
+    { artefato: "Diagrama de sequência", doc: "docs/04-sequencia.md",
+      arquivos: [["functions/src/app.ts", "recebe o pedido do Claude"],
+                 ["functions/src/repositorioFirestore.ts", "grava no banco"],
+                 ["mural/index.html", "recebe o aviso e mostra o cartão"]] },
+    { artefato: "Histórias de usuário e critérios", doc: "docs/05-historias-de-usuario.md",
+      arquivos: [["functions/src/teste.ts", "prova que cada história funciona"]] },
+    { artefato: "Protótipo (wireframe)", doc: "docs/06-wireframe.md",
+      arquivos: [["mural/index.html", "o mural ao vivo, para o projetor"]] },
+    { artefato: "Decisões técnicas e arquitetura", doc: "docs/07-projeto.md",
+      arquivos: [["functions/src/index.ts", "publica a função no Firebase"],
+                 ["functions/src/repositorio.ts", "onde guardar: a interface"],
+                 ["firebase.json", "como publicar"]] },
+    { artefato: "Requisitos não funcionais", doc: "docs/01-requisitos.md",
+      arquivos: [["functions/src/dotprompt.ts", "RNF03: o formato .prompt"],
+                 ["firestore.rules", "RNF04: quem lê e quem grava"]] },
+  ];
+
+  const lista = document.getElementById("mapa");
+  for (const item of mapa) {
+    const li = document.createElement("li");
+    li.className = "linha";
+
+    const artefato = document.createElement("a");
+    artefato.className = "artefato";
+    artefato.href = GH + item.doc;
+    artefato.target = "_blank";
+    artefato.rel = "noopener";
+    const titulo = document.createElement("b");
+    titulo.textContent = item.artefato;
+    const caminho = document.createElement("span");
+    caminho.textContent = item.doc;
+    artefato.append(titulo, caminho);
+
+    const seta = document.createElement("div");
+    seta.className = "seta";
+    seta.setAttribute("aria-hidden", "true");
+    seta.textContent = "→";
+
+    const arquivos = document.createElement("div");
+    arquivos.className = "arquivos";
+    for (const [arquivo, papel] of item.arquivos) {
+      const a = document.createElement("a");
+      a.className = "arquivo";
+      a.href = GH + arquivo;
+      a.target = "_blank";
+      a.rel = "noopener";
+      const nome = document.createElement("code");
+      nome.textContent = arquivo.split("/").pop();
+      const descricao = document.createElement("span");
+      descricao.textContent = papel;
+      a.append(nome, descricao);
+      arquivos.append(a);
+    }
+
+    li.append(artefato, seta, arquivos);
+    lista.append(li);
+  }
+</script>
+</body>
+</html>
