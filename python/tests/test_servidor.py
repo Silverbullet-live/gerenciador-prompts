@@ -9,6 +9,7 @@ from gerenciador_prompts.servidor import (  # o código testado
     PedidoDeLook,
     aprovar_prompt,
     buscar_prompts,
+    entregar_colecao,
     listar_colecoes,
     obter_prompt,
     reusar_prompt,
@@ -46,6 +47,7 @@ def test_publica_as_ferramentas():
     assert sorted(f.name for f in ferramentas) == [
         "aprovar_prompt",
         "buscar_prompts",
+        "entregar_colecao",
         "listar_colecoes",
         "obter_prompt",
         "reusar_prompt",
@@ -206,3 +208,46 @@ def test_exporta_em_dotprompt():
     assert "    look: string, a peça com cor e tecido\n" in arquivo
     assert "  status: aprovado\n  aprovadoPor: chefe.ana\n  autor: rafa\n" in arquivo
     assert arquivo.rstrip().endswith("A modelo veste {{look}}.")
+
+
+# ── Fatia 5 · H05: entregar à engenharia ───────────────────────────────────
+
+
+def test_nao_entrega_sem_prompt_aprovado():
+    """Sem padrão aprovado, não há o que entregar."""
+    salvar_prompt(titulo="Praia", texto="Veste {{look}}.", colecao="Verão 2027")
+    with pytest.raises(ToolError, match="ainda não tem prompt aprovado"):
+        entregar_colecao("Verão 2027", "eng.joao")
+
+
+def test_nao_entrega_sem_looks():
+    """Issue #3: com o prompt aprovado mas sem looks, a entrega é recusada."""
+    id = id_do_salvo(salvar_prompt(titulo="Outono", texto="Com {{look}}.", colecao="Outono 2027"))
+    aprovar_prompt(id, "chefe.ana")
+    with pytest.raises(ToolError, match="ainda não tem looks gerados"):
+        entregar_colecao("Outono 2027", "eng.joao")
+
+
+def test_entrega_o_prompt_aprovado_e_os_looks(repositorio_limpo):
+    """H05: a entrega traz o .prompt aprovado e os looks, e cada look fica marcado com ela."""
+    id = id_do_salvo(
+        salvar_prompt(titulo="Editorial de praia", texto="Veste {{look}}.", colecao="Verão 2027")
+    )
+    aprovar_prompt(id, "chefe.ana")
+    reusar_prompt(
+        id,
+        [
+            PedidoDeLook(peca="vestido midi", cor_e_tecido="verde-oliva, linho"),
+            PedidoDeLook(peca="conjunto de alfaiataria", cor_e_tecido="areia, crepe"),
+        ],
+    )
+    resposta = entregar_colecao("Verão 2027", "eng.joao")
+    assert "registrada para eng.joao" in resposta
+    assert "Arquivo: verao-2027/editorial_de_praia.prompt" in resposta
+    assert (
+        "Looks enviados (2):\n• vestido midi (verde-oliva, linho)\n"
+        "• conjunto de alfaiataria (areia, crepe)"
+    ) in resposta
+    assert "issue #5" in resposta  # é honesta sobre o que ainda não vai
+    # O conftest entrega o repositório limpo como parâmetro: dá para olhar dentro dele.
+    assert all(look.entrega_id for look in repositorio_limpo.looks)

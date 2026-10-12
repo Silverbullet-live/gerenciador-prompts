@@ -3,6 +3,7 @@
 from gerenciador_prompts.modelo import (
     LIMITES,
     Colecao,
+    Entrega,
     Look,
     Prompt,
     ResumoDaColecao,
@@ -18,6 +19,7 @@ class RepositorioEmMemoria:
         self.prompts = []  # a "gaveta" deste repositório: começa vazia
         self.colecoes = {}  # Fatia 2: as coleções, pelo id ("verao-2027" → Colecao)
         self.looks = []  # Fatia 3: os looks gerados a partir dos prompts
+        self.entregas = []  # Fatia 5: as entregas à engenharia
 
     def salvar_prompt(self, prompt: Prompt) -> Prompt:
         """Guarda o prompt e o devolve."""
@@ -119,6 +121,16 @@ class RepositorioEmMemoria:
         prompt.aprovado_por = aprovado_por
         prompt.aprovado_em = agora()
         return prompt, anterior
+
+    # ── Fatia 5 · H05: entregas ────────────────────────────────────────────
+
+    def registrar_entrega(self, entrega: Entrega) -> Entrega:
+        """Guarda a entrega e marca cada look enviado com o id dela."""
+        self.entregas.append(entrega)
+        for look in self.looks:
+            if look.id in entrega.looks:
+                look.entrega_id = entrega.id
+        return entrega
 
 
 def combina(

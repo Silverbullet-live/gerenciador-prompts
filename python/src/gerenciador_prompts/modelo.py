@@ -120,3 +120,18 @@ class Look:
     entrega_id: str | None = None
     id: str = field(default_factory=novo_id)
     criado_em: datetime = field(default_factory=agora)
+
+
+# ── Fatia 5 · H05: entregar à engenharia ────────────────────────────────────
+
+
+@dataclass
+class Entrega:
+    """O pacote que a engenharia recebe: o prompt aprovado e os looks da coleção."""
+
+    colecao: str
+    prompt_id: str  # o prompt aprovado, o padrão da coleção
+    looks: list[str]  # os ids dos looks enviados (ao menos um)
+    recebido_por: str
+    id: str = field(default_factory=novo_id)
+    data: datetime = field(default_factory=agora)

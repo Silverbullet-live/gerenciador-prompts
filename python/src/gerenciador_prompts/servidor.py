@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from gerenciador_prompts.dotprompt import nome_do_arquivo, para_dotprompt
 from gerenciador_prompts.modelo import (
     LIMITES,
+    Entrega,
     Look,
     Prompt,
     id_da_colecao,
@@ -34,6 +35,8 @@ para não perdê-los, não reescrevê-los a cada troca de coleção e manter um 
 - {{look}}: quando o prompt descreve uma peça específica, sugira trocar a peça por {{look}}
   antes de salvar. Assim o prompt pode ser reusado em toda a coleção (reusar_prompt).
 - Aprovar: aprovar_prompt é papel do editor-chefe. Cada coleção tem um único prompt aprovado.
+- Entregar: entregar_colecao gera o pacote da engenharia (o .prompt aprovado e os looks).
+  Nesta versão ele ainda não leva as imagens aprovadas: não diga que as imagens foram entregues.
 - Tudo aparece num mural público projetado em sala: nunca salve dados pessoais (nome completo,
   telefone, e-mail, documentos). Se o texto contiver algo assim, avise e peça para remover."""
 
@@ -191,6 +194,48 @@ def obter_prompt(id: IdDePrompt) -> str:
     if prompt is None:
         raise ToolError(f'Não encontrei um prompt com id "{id}".')
     return f"Arquivo sugerido: {nome_do_arquivo(prompt)}\n\n{para_dotprompt(prompt)}"
+
+
+# Fatia 5 · H05: entregar a coleção à engenharia
+@servidor.tool()
+def entregar_colecao(colecao: NomeDeColecao, recebido_por: Apelido) -> str:
+    """Entrega à engenharia o prompt aprovado em .prompt e os looks gerados a partir dele.
+
+    Exige um prompt aprovado e ao menos um look antes de registrar a entrega.
+    """
+    id = id_da_colecao(colecao)
+    aprovados = repo.buscar(colecao=id, somente_aprovados=True, limite=1)
+    if not aprovados:
+        raise ToolError(
+            f'A coleção "{colecao}" ainda não tem prompt aprovado. '
+            "O editor-chefe precisa aprovar um antes da entrega."
+        )
+    aprovado = aprovados[0]
+    looks = repo.looks_do_prompt(aprovado.id)
+    # Uma entrega é um pacote de verdade: sem looks, não há o que entregar (issue #3).
+    if not looks:
+        raise ToolError(
+            f'A coleção "{colecao}" ainda não tem looks gerados. '
+            "Use reusar_prompt antes de entregar à engenharia."
+        )
+    entrega = repo.registrar_entrega(
+        Entrega(
+            colecao=id,
+            prompt_id=aprovado.id,
+            looks=[look.id for look in looks],
+            recebido_por=recebido_por.strip(),
+        )
+    )
+    lista = "\n".join(
+        f"• {look.peca} ({look.cor_e_tecido})" if look.cor_e_tecido else f"• {look.peca}"
+        for look in looks
+    )
+    return (
+        f"Entrega {entrega.id} registrada para {entrega.recebido_por}.\n\n"
+        f"Arquivo: {nome_do_arquivo(aprovado)}\n\n{para_dotprompt(aprovado)}\n"
+        f"Looks enviados ({len(looks)}):\n{lista}\n\n"
+        "Imagens aprovadas: ainda não vão na entrega nesta versão (RF06 parcial, issue #5)."
+    )
 
 
 def resumo(p: Prompt) -> str:
