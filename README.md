@@ -4,6 +4,8 @@ Um conector para o app do Claude que salva, organiza, reusa e aprova os prompts 
 
 Projeto-base da aula de **Análise de Sistemas**: a análise primeiro, o código depois. Comece pela pasta [`docs/`](docs/).
 
+Quer colaborar? Leia o [guia de colaboração](CONTRIBUTING.md): do fork ao pull request, com os erros mais comuns.
+
 > **A Fashion Co. é uma marca fictícia.** O case é real; o foco é estudantil.
 
 ## O case
