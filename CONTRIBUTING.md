@@ -62,7 +62,7 @@ git push -u origin <nome-da-tarefa>
 
 1. Depois do push, abra a página do seu fork no GitHub. Vai aparecer um aviso com o botão **Compare & pull request**.
 2. Confira o destino: `brevvi/gerenciador-prompts`, branch `main`.
-3. No texto, explique **o problema e a solução**. Se o pull request resolve uma issue, escreva `fecha #<número>`: ela será fechada sozinha quando a mudança for aceita.
+3. No texto, explique **o problema e a solução**. Se o pull request resolve uma issue, escreva `Closes #<número>`: ela será fechada sozinha quando a mudança for aceita. **A palavra precisa ser em inglês** (`Closes`, `Fixes` ou `Resolves`): "fecha #3" só cria um link, e a issue continua aberta.
 4. Clique em **Create pull request**.
 
 A partir daí, quem mantém o projeto revisa, comenta e, se estiver tudo certo, faz o merge.
