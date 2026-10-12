@@ -16,11 +16,21 @@ Toda decisão tem alternativas e consequências. Registrar o porquê, antes de c
 |---|---|---|---|---|
 | **Integração** | Conector MCP | App ou site próprio | O editor já trabalha no Claude; MCP é o padrão aberto, criado pela Anthropic, para ligar ferramentas a assistentes | Exige um servidor na internet; o usuário precisa de um cliente MCP (Claude ou outro) |
 | **Plataforma** | Firebase (Functions, Firestore, Hosting) | Servidor próprio, Cloud Run, Vercel | Sem servidor para manter (RNF05); hospedagem e banco no mesmo lugar; cota gratuita cobre uma turma | Functions exige o plano Blaze (cartão cadastrado); dependência do Google |
-| **Linguagem** | TypeScript | Python | O SDK oficial do MCP em TypeScript é a implementação de referência; o mural já é JavaScript, então uma linguagem só; tipos pegam erros antes de rodar | Quem programa só em Python precisa aprender; Python também atenderia (SDK `mcp`, Functions em Python) |
+| **Linguagem** | TypeScript | Python | O SDK oficial do MCP em TypeScript é a implementação de referência; o mural já é JavaScript, então uma linguagem só; tipos pegam erros antes de rodar | Quem programa só em Python precisa aprender. Python atenderia (SDK `mcp`), mas mudaria a plataforma: em Python, as Functions não rodam esse servidor sem um adaptador, e o caminho natural seria o Cloud Run |
 | **Banco** | Firestore | PostgreSQL ou outro SQL | Avisa o mural em tempo real (RNF01); sem servidor; documentos simples | Não busca por trecho de texto: a busca filtra os 500 prompts mais recentes em memória; sem *joins* |
 | **Formato** | Dotprompt (`.prompt`) | JSON, texto puro | Padrão de mercado do Firebase Genkit (RNF03); o `{{look}}` vira entrada declarada | A engenharia precisa conhecer o formato |
 
 As decisões vêm depois dos requisitos e **moldam a arquitetura**: o desenho abaixo já mostra Firebase, Firestore e TypeScript porque essas escolhas foram feitas antes. A linguagem não é ponto de partida: é uma decisão como as outras, e poderia ser outra.
+
+### Revisão de uma decisão (12/10/2026)
+
+A decisão da linguagem foi posta à prova: o servidor foi reescrito em Python, fatia por fatia, com os mesmos testes (ramo [`python`](https://github.com/brevvi/gerenciador-prompts/tree/python)). Funcionou, inclusive gravando no mesmo Firestore. Mesmo assim, **a decisão foi mantida**:
+
+- a versão em TypeScript já está no ar e foi testada no ensaio da aula;
+- em Python, a plataforma também teria de mudar (Cloud Run no lugar das Functions): uma decisão puxa a outra;
+- a três semanas da aula, trocar a infraestrutura é risco sem ganho para quem vai usar.
+
+Registrar a revisão, e não só a decisão, é o que deixa o histórico honesto: quem chegar depois sabe que a alternativa foi testada, e por que não foi adotada.
 
 ## Arquitetura: as peças e como elas conversam
 
