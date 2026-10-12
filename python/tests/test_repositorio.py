@@ -1,8 +1,7 @@
 """Testes do repositório em memória."""
 
-from gerenciador_prompts.repositorio import RepositorioEmMemoria
-
 from gerenciador_prompts.modelo import Prompt
+from gerenciador_prompts.repositorio import RepositorioEmMemoria
 
 
 def test_salva_e_encontra_o_prompt():
