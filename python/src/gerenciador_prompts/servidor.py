@@ -11,6 +11,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import BaseModel, Field
 
+from gerenciador_prompts.dotprompt import nome_do_arquivo, para_dotprompt
 from gerenciador_prompts.modelo import (
     LIMITES,
     Look,
@@ -32,6 +33,7 @@ para não perdê-los, não reescrevê-los a cada troca de coleção e manter um 
   listar_colecoes e sugira uma existente. Se não disser um título, proponha um curto.
 - {{look}}: quando o prompt descreve uma peça específica, sugira trocar a peça por {{look}}
   antes de salvar. Assim o prompt pode ser reusado em toda a coleção (reusar_prompt).
+- Aprovar: aprovar_prompt é papel do editor-chefe. Cada coleção tem um único prompt aprovado.
 - Tudo aparece num mural público projetado em sala: nunca salve dados pessoais (nome completo,
   telefone, e-mail, documentos). Se o texto contiver algo assim, avise e peça para remover."""
 
@@ -44,6 +46,7 @@ Titulo = Annotated[str, Field(min_length=1, max_length=LIMITES["titulo"])]
 Texto = Annotated[str, Field(min_length=1, max_length=LIMITES["texto"])]
 NomeDeColecao = Annotated[str, Field(min_length=1, max_length=LIMITES["colecao"])]
 Apelido = Annotated[str, Field(min_length=1, max_length=LIMITES["apelido"])]
+IdDePrompt = Annotated[str, Field(min_length=1, max_length=64)]
 
 
 # Qual é a ferramenta: listar_colecoes (Fatia 2 · H02: deixa de ser fixa e lê o repositório)
@@ -70,11 +73,20 @@ def salvar_prompt(
     colecao: NomeDeColecao,
     autor: Apelido = "anônimo",
     temporada: str | None = None,
-    ano: int | None = None,
+    ano: Annotated[int, Field(ge=2000, le=2100)] | None = None,
+    modelo: Annotated[str, Field(max_length=80)] | None = None,
+    temperatura: Annotated[float, Field(ge=0, le=2)] | None = None,
 ) -> str:
     """Salva um prompt numa coleção. Entra como rascunho. Use {{look}} onde a peça muda."""
     c = repo.garantir_colecao(colecao, temporada, ano, editor_responsavel=autor)
-    prompt = Prompt(titulo=titulo.strip(), texto=texto, colecao=c.id, autor=autor.strip())
+    prompt = Prompt(
+        titulo=titulo.strip(),
+        texto=texto,
+        colecao=c.id,
+        autor=autor.strip(),
+        modelo=modelo.strip() if modelo else None,
+        temperatura=temperatura,
+    )
     repo.salvar_prompt(prompt)
     # Fatia 3: avisar quando o prompt não poderá ser reusado.
     dica = ""
@@ -116,7 +128,7 @@ class PedidoDeLook(BaseModel):
 
 @servidor.tool()
 def reusar_prompt(
-    id: Annotated[str, Field(min_length=1, max_length=64)],
+    id: IdDePrompt,
     looks: Annotated[
         list[PedidoDeLook], Field(min_length=1, max_length=LIMITES["looks_por_pedido"])
     ],
@@ -154,6 +166,31 @@ def reusar_prompt(
     return f'{len(novos)} look(s) gerado(s) a partir de "{prompt.titulo}":{aviso}\n\n' + (
         "\n\n".join(blocos)
     )
+
+
+# Fatia 4 · H04: aprovar o prompt padrão (papel do editor-chefe)
+@servidor.tool()
+def aprovar_prompt(id: IdDePrompt, aprovado_por: Apelido) -> str:
+    """Papel do editor-chefe: aprova o prompt padrão da coleção. O anterior volta a rascunho."""
+    resultado = repo.aprovar(id.strip(), aprovado_por.strip())
+    if resultado is None:
+        raise ToolError(f'Não encontrei um prompt com id "{id}".')
+    aprovado, anterior = resultado  # "desempacota" a dupla (aprovado, anterior)
+    troca = f' O antigo padrão, "{anterior.titulo}", voltou a rascunho.' if anterior else ""
+    return (
+        f'"{aprovado.titulo}" agora é o prompt aprovado da coleção {aprovado.colecao}, '
+        f"por {aprovado_por.strip()}.{troca}"
+    )
+
+
+# Fatia 4: o prompt completo no formato .prompt
+@servidor.tool()
+def obter_prompt(id: IdDePrompt) -> str:
+    """Devolve um prompt completo pelo id, no formato Dotprompt (.prompt) do Firebase Genkit."""
+    prompt = repo.obter(id.strip())
+    if prompt is None:
+        raise ToolError(f'Não encontrei um prompt com id "{id}".')
+    return f"Arquivo sugerido: {nome_do_arquivo(prompt)}\n\n{para_dotprompt(prompt)}"
 
 
 def resumo(p: Prompt) -> str:

@@ -68,6 +68,12 @@ class Prompt:
     id: str = field(default_factory=novo_id)
     criado_em: datetime = field(default_factory=agora)
     oculto: bool = False  # "ocultar" no mural esconde o cartão; o dado continua
+    # Fatia 4 · H04: aprovação e exportação em .prompt.
+    versao: int = 1  # na v1 é sempre 1: versões de prompt são o desafio v3 (H06)
+    aprovado_por: str | None = None  # só um apelido: a v1 não tem login (desafio v2)
+    aprovado_em: datetime | None = None
+    modelo: str | None = None  # o modelo de IA para o qual o prompt foi pensado
+    temperatura: float | None = None
 
 
 @dataclass

@@ -7,8 +7,10 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from gerenciador_prompts.servidor import (  # o código testado
     PedidoDeLook,
+    aprovar_prompt,
     buscar_prompts,
     listar_colecoes,
+    obter_prompt,
     reusar_prompt,
     salvar_prompt,
     servidor,
@@ -42,8 +44,10 @@ def test_publica_as_ferramentas():
     """O servidor anuncia as ferramentas: é o que o Claude vê no tools/list."""
     ferramentas = asyncio.run(servidor.list_tools())
     assert sorted(f.name for f in ferramentas) == [
+        "aprovar_prompt",
         "buscar_prompts",
         "listar_colecoes",
+        "obter_prompt",
         "reusar_prompt",
         "salvar_prompt",
     ]
@@ -158,3 +162,47 @@ def test_reusar_pelo_protocolo():
         servidor.call_tool("reusar_prompt", {"id": id, "looks": [{"peca": "saia"}]})
     )
     assert "Veste saia." in resultado.structured_content["result"]
+
+
+# ── Fatia 4 · H04: aprovar o padrão e exportar em .prompt ──────────────────
+
+
+def test_um_so_aprovado_por_colecao():
+    """H04: aprovar um prompt devolve o antigo padrão a rascunho."""
+    praia = id_do_salvo(salvar_prompt(titulo="Praia", texto="Veste {{look}}.", colecao="Verão"))
+    estudio = id_do_salvo(salvar_prompt(titulo="Estúdio", texto="Fundo cinza.", colecao="Verão"))
+    aprovar_prompt(estudio, "chefe.ana")
+    resposta = aprovar_prompt(praia, "chefe.ana")
+    assert '"Praia" agora é o prompt aprovado' in resposta
+    assert '"Estúdio", voltou a rascunho' in resposta
+    aprovados = buscar_prompts(colecao="Verão", somente_aprovados=True)
+    assert aprovados.startswith("1 prompt(s):")
+    assert "Praia" in aprovados and "★ aprovado" in aprovados
+    assert 'aprovado: "Praia"' in listar_colecoes()
+
+
+def test_aprovar_id_inexistente():
+    """Aprovar um id que não existe é erro."""
+    with pytest.raises(ToolError, match="Não encontrei"):
+        aprovar_prompt("nao-existe", "chefe.ana")
+
+
+def test_exporta_em_dotprompt():
+    """O .prompt traz modelo, temperatura, o {{look}} como entrada e quem aprovou."""
+    id = id_do_salvo(
+        salvar_prompt(
+            titulo="Editorial de praia",
+            texto="Foto na praia. A modelo veste {{look}}.",
+            colecao="Verão 2027",
+            autor="rafa",
+            modelo="imagen-4",
+            temperatura=0.4,
+        )
+    )
+    aprovar_prompt(id, "chefe.ana")
+    arquivo = obter_prompt(id)
+    assert "Arquivo sugerido: verao-2027/editorial_de_praia.prompt" in arquivo
+    assert "model: imagen-4\nconfig:\n  temperature: 0.4\n" in arquivo
+    assert "    look: string, a peça com cor e tecido\n" in arquivo
+    assert "  status: aprovado\n  aprovadoPor: chefe.ana\n  autor: rafa\n" in arquivo
+    assert arquivo.rstrip().endswith("A modelo veste {{look}}.")

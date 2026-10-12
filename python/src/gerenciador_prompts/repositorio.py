@@ -6,6 +6,7 @@ from gerenciador_prompts.modelo import (
     Look,
     Prompt,
     ResumoDaColecao,
+    agora,
     id_da_colecao,
 )
 
@@ -91,6 +92,33 @@ class RepositorioEmMemoria:
     def looks_do_prompt(self, prompt_id: str) -> list[Look]:
         """Os looks que nasceram de um prompt."""
         return [look for look in self.looks if look.prompt_id == prompt_id]
+
+    # ── Fatia 4 · H04: aprovar o padrão ─────────────────────────────────────
+
+    def aprovar(self, id: str, aprovado_por: str) -> tuple[Prompt, Prompt | None] | None:
+        """Aprova o prompt como padrão da coleção.
+
+        Regra de negócio: cada coleção tem um só aprovado. O padrão anterior, se houver,
+        volta a rascunho. Devolve (aprovado, anterior), ou None se o id não existir.
+        """
+        prompt = self.obter(id)
+        if prompt is None:
+            return None
+        anterior = None
+        for outro in self.prompts:
+            if (
+                outro.colecao == prompt.colecao
+                and outro.status == "aprovado"
+                and outro is not prompt
+            ):
+                outro.status = "rascunho"
+                outro.aprovado_por = None
+                outro.aprovado_em = None
+                anterior = outro
+        prompt.status = "aprovado"
+        prompt.aprovado_por = aprovado_por
+        prompt.aprovado_em = agora()
+        return prompt, anterior
 
 
 def combina(
