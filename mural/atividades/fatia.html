@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade · Monte a fatia da H03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{--ink:#1a1a1a;--mute:#5f6672;--navy:#202c46;--accent:#64b0bd;--accent-ink:#2f7d8a;--soft:#eef6f7;--paper:#fff;--stage:#2b2f36;--line:#dadedf;--bad:#a33828;--mono:"IBM Plex Mono",ui-monospace,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stage);color:var(--ink);font-family:Barlow,Arial,sans-serif}
+  main{width:min(1120px,calc(100% - 32px));margin:28px auto;background:var(--paper);border-top:8px solid var(--accent);padding:36px 44px 40px}
+  .eyebrow{margin:0 0 12px;color:var(--mute);font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  h1{max-width:860px;margin:0;font-size:40px;line-height:1.1}
+  .intro{margin:16px 0 8px;color:var(--mute);font-size:21px;line-height:1.4}
+  .historia{margin:0 0 26px;padding:14px 18px;border-left:6px solid var(--accent);background:var(--soft);font-size:20px;line-height:1.35}
+  .colunas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .coluna{border:2px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .coluna.certa{border-color:var(--accent-ink);background:var(--soft)}
+  .coluna.errada{border-color:var(--bad)}
+  .coluna h2{margin:0;font:600 17px var(--mono);color:var(--navy)}
+  .coluna p.papel{margin:0;color:var(--mute);font-size:15px;line-height:1.3}
+  .opcoes{display:grid;gap:6px;border:0;margin:0;padding:0}
+  .opcao{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:16px;line-height:1.3}
+  .opcao input{margin-top:3px;accent-color:var(--accent-ink);flex:none}
+  .opcao code{font-family:var(--mono);font-size:14px}
+  .veredito{min-height:20px;font-size:15px;font-weight:600}
+  .certa .veredito{color:var(--accent-ink)}
+  .errada .veredito{color:var(--bad)}
+  .veredito a{color:var(--accent-ink)}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+  button{min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--navy);font:600 17px Barlow,Arial,sans-serif;cursor:pointer}
+  button:hover,button:focus-visible{border-color:var(--accent-ink);background:var(--soft)}
+  .primary{border-color:var(--navy);background:var(--navy);color:#fff}
+  .primary:hover,.primary:focus-visible{background:#2d3c5d;color:#fff}
+  .feedback{min-height:28px;margin:14px 0 0;font-size:19px;font-weight:600;color:var(--accent-ink)}
+  .feedback.error{color:var(--bad)}
+  .fatia{margin-top:18px;padding:18px 22px;border-left:6px solid var(--accent-ink);background:var(--soft)}
+  .fatia h3{margin:0 0 10px;font-size:21px}
+  .fatia ol{margin:0;padding-left:24px;font-size:18px;line-height:1.5}
+  .fatia code{font-family:var(--mono);font-size:15px}
+  .bonus{margin-top:26px;padding:20px 22px;border-left:6px solid var(--accent);background:var(--soft)}
+  .bonus p{margin:0 0 12px;font-size:20px;line-height:1.35}
+  .bonus label{display:flex;gap:10px;align-items:flex-start;margin:6px 0;font-size:18px;line-height:1.3;cursor:pointer}
+  @media(max-width:860px){.colunas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){
+    main{margin:12px auto;padding:24px 16px 28px}
+    h1{font-size:30px}.intro{font-size:18px}.historia{font-size:18px}
+    .colunas{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Implementação · fatias verticais · 5 minutos</p>
+  <h1>Monte a fatia da H03.</h1>
+  <p class="intro">Uma fatia é uma história de usuário que atravessa todos os arquivos. Em cada arquivo, escolha o pedaço de código que a H03 acrescentou.</p>
+  <p class="historia"><b>H03.</b> Como editor de moda, quero reusar um prompt trocando só os looks, para não reescrever tudo a cada coleção.</p>
+
+  <div class="colunas" id="colunas"></div>
+  <div class="actions">
+    <button class="primary" id="conferir" type="button">Conferir a fatia</button>
+    <button id="recomecar" type="button">Recomeçar</button>
+  </div>
+  <p class="feedback" id="feedback" aria-live="polite"></p>
+  <div class="fatia" id="fatia" hidden>
+    <h3>A fatia montada: a H03 de ponta a ponta</h3>
+    <ol>
+      <li><code>teste.ts</code>: o teste "reusa trocando os looks" diz o que precisa ser verdade.</li>
+      <li><code>modelo.ts</code>: <code>preencherLook</code> troca o <code>{{look}}</code> pela peça.</li>
+      <li><code>repositorio.ts</code>: <code>salvarLooks</code> guarda os looks gerados.</li>
+      <li><code>servidorMcp.ts</code>: a ferramenta <code>reusar_prompt</code> junta tudo e responde ao Claude.</li>
+    </ol>
+  </div>
+
+  <section class="bonus" aria-labelledby="bonus-titulo">
+    <p id="bonus-titulo"><b>Bônus.</b> Se o sistema fosse construído em camadas horizontais (todo o modelo, depois todo o repositório, depois todas as ferramentas), quando você descobriria que o <code>reusar_prompt</code> não funciona?</p>
+    <label><input type="radio" name="bonus" value="cedo"><span>Logo, ao escrever o <code>preencherLook</code>.</span></label>
+    <label><input type="radio" name="bonus" value="fim"><span>Só no fim, quando a última camada (as ferramentas) ficasse pronta e tudo fosse ligado.</span></label>
+    <label><input type="radio" name="bonus" value="nunca"><span>Nunca: o teste de cada camada já garante a história.</span></label>
+    <div class="actions"><button class="primary" id="conferir-bonus" type="button">Conferir bônus</button></div>
+    <p class="feedback" id="feedback-bonus" aria-live="polite"></p>
+  </section>
+</main>
+<script>
+  const GH = "https://github.com/brevvi/gerenciador-prompts/blob/main/functions/src/";
+  // Os pedaços são reais: todos existem no repositório. Só um por arquivo é da H03.
+  const colunas = [
+    { arquivo: "teste.ts", papel: "os critérios de aceite", certa: "h03", opcoes: [
+      ["h02", "o teste <code>busca por coleção</code>"],
+      ["h03", "o teste <code>reusa trocando os looks</code>"],
+      ["h04", "o teste <code>aprova o padrão</code>"] ] },
+    { arquivo: "modelo.ts", papel: "o domínio e as regras", certa: "h03", opcoes: [
+      ["h01", "a função <code>idDaColecao</code>"],
+      ["h05", "a interface <code>Entrega</code>"],
+      ["h03", "a função <code>preencherLook</code>"] ] },
+    { arquivo: "repositorio.ts", papel: "onde guardar", certa: "h03", opcoes: [
+      ["h03", "o método <code>salvarLooks</code>"],
+      ["h02", "o método <code>buscar</code>"],
+      ["h04", "o método <code>aprovar</code>"] ] },
+    { arquivo: "servidorMcp.ts", papel: "o que o Claude pode chamar", certa: "h03", opcoes: [
+      ["h01", "a ferramenta <code>salvar_prompt</code>"],
+      ["h05", "a ferramenta <code>entregar_colecao</code>"],
+      ["h03", "a ferramenta <code>reusar_prompt</code>"] ] },
+  ];
+  const historias = { h01: "H01 (salvar)", h02: "H02 (buscar)", h03: "H03", h04: "H04 (aprovar)", h05: "H05 (entregar)" };
+
+  const area = document.getElementById("colunas");
+  colunas.forEach((c, i) => {
+    const div = document.createElement("div");
+    div.className = "coluna";
+    div.innerHTML = `<h2>${c.arquivo}</h2><p class="papel">${c.papel}</p>`;
+    const grupo = document.createElement("fieldset");
+    grupo.className = "opcoes";
+    grupo.setAttribute("aria-label", `Pedaço da H03 em ${c.arquivo}`);
+    for (const [valor, texto] of c.opcoes) {
+      const label = document.createElement("label");
+      label.className = "opcao";
+      label.innerHTML = `<input type="radio" name="col${i}" value="${valor}"><span>${texto}</span>`;
+      grupo.append(label);
+    }
+    const veredito = document.createElement("p");
+    veredito.className = "veredito";
+    veredito.setAttribute("aria-live", "polite");
+    div.append(grupo, veredito);
+    area.append(div);
+    grupo.addEventListener("change", () => { div.classList.remove("certa", "errada"); veredito.textContent = ""; });
+  });
+
+  document.getElementById("conferir").addEventListener("click", () => {
+    let acertos = 0, faltando = 0;
+    colunas.forEach((c, i) => {
+      const div = area.children[i];
+      const veredito = div.querySelector(".veredito");
+      const escolha = document.querySelector(`input[name="col${i}"]:checked`)?.value;
+      div.classList.remove("certa", "errada");
+      if (!escolha) { faltando++; veredito.textContent = ""; return; }
+      if (escolha === c.certa) {
+        acertos++;
+        div.classList.add("certa");
+        veredito.innerHTML = `✓ É da H03. <a href="${GH}${c.arquivo}" target="_blank" rel="noopener">Ver no código ↗</a>`;
+      } else {
+        div.classList.add("errada");
+        veredito.textContent = `✗ Esse pedaço é da ${historias[escolha]}.`;
+      }
+    });
+    const fb = document.getElementById("feedback");
+    const fatia = document.getElementById("fatia");
+    fb.classList.toggle("error", acertos < colunas.length);
+    if (faltando) fb.textContent = "Escolha um pedaço em cada arquivo.";
+    else if (acertos < colunas.length) fb.textContent = `${acertos} de 4. Pergunte a cada pedaço: ele ajuda a reusar um prompt trocando os looks?`;
+    else fb.textContent = "Fatia completa: a H03 passa por todos os arquivos.";
+    fatia.hidden = acertos < colunas.length;
+  });
+
+  document.getElementById("recomecar").addEventListener("click", () => {
+    document.querySelectorAll('input[type="radio"]').forEach((r) => { r.checked = false; });
+    [...area.children].forEach((d) => { d.classList.remove("certa", "errada"); d.querySelector(".veredito").textContent = ""; });
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("feedback-bonus").textContent = "";
+    document.getElementById("fatia").hidden = true;
+  });
+
+  document.getElementById("conferir-bonus").addEventListener("click", () => {
+    const escolha = document.querySelector('input[name="bonus"]:checked')?.value;
+    const fb = document.getElementById("feedback-bonus");
+    fb.classList.toggle("error", escolha !== "fim");
+    fb.textContent = escolha === "fim"
+      ? "Isso. Em camadas, as peças só conversam no fim. Na fatia, a H03 funciona (e é testada) antes de começar a H04."
+      : "Não. Cada camada pode passar no próprio teste e, mesmo assim, as peças não se encaixarem. Só se descobre ao ligar tudo, no fim.";
+  });
+</script>
+</body>
+</html>
