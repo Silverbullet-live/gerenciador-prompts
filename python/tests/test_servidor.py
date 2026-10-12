@@ -249,5 +249,6 @@ def test_entrega_o_prompt_aprovado_e_os_looks(repositorio_limpo):
         "• conjunto de alfaiataria (areia, crepe)"
     ) in resposta
     assert "issue #5" in resposta  # é honesta sobre o que ainda não vai
-    # O conftest entrega o repositório limpo como parâmetro: dá para olhar dentro dele.
-    assert all(look.entrega_id for look in repositorio_limpo.looks)
+    # O conftest entrega o repositório limpo como parâmetro: dá para consultá-lo.
+    # Pelo método (e não pela lista interna), o teste vale na memória e no Firestore.
+    assert all(look.entrega_id for look in repositorio_limpo.looks_do_prompt(id))

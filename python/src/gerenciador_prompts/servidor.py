@@ -3,6 +3,7 @@ Servidor MCP do Gerenciador de Prompts da Fashion Co.
 Walking skeleton: ferramenta com resposta fixa + regras em fatias.
 """
 
+import os
 from typing import Annotated
 
 # Que peça da arquitetura estou construindo: [Servidor MCP]
@@ -42,7 +43,18 @@ para não perdê-los, não reescrevê-los a cada troca de coleção e manter um 
 
 # Como essa biblioteca cria um servidor: classe MCPServer --> SDK: py.sdk.modelcontextprotocol.io
 servidor = MCPServer("gerenciador-de-prompts-fashion-co", instructions=INSTRUCOES)
-repo = RepositorioEmMemoria()
+
+
+def criar_repositorio():
+    """Fatia 6: onde guardar. REPOSITORIO=firestore grava no Firestore; sem isso, memória."""
+    if os.environ.get("REPOSITORIO") == "firestore":
+        from gerenciador_prompts.repositorio_firestore import RepositorioFirestore
+
+        return RepositorioFirestore()
+    return RepositorioEmMemoria()
+
+
+repo = criar_repositorio()
 
 # Os tipos dos parâmetros já trazem os limites do RNF04: o SDK recusa o que passar deles.
 Titulo = Annotated[str, Field(min_length=1, max_length=LIMITES["titulo"])]
