@@ -2,9 +2,14 @@
 
 import asyncio  # roda as funções assíncronas do SDK (list_tools, call_tool)
 
+import pytest
+from mcp.server.mcpserver.exceptions import ToolError
+
 from gerenciador_prompts.servidor import (  # o código testado
+    PedidoDeLook,
     buscar_prompts,
     listar_colecoes,
+    reusar_prompt,
     salvar_prompt,
     servidor,
 )
@@ -39,6 +44,7 @@ def test_publica_as_ferramentas():
     assert sorted(f.name for f in ferramentas) == [
         "buscar_prompts",
         "listar_colecoes",
+        "reusar_prompt",
         "salvar_prompt",
     ]
 
@@ -95,3 +101,60 @@ def test_busca_por_palavra():
 def test_busca_sem_resultado():
     """Quando nada combina, a resposta diz isso claramente."""
     assert buscar_prompts(termo="praia") == "Nenhum prompt encontrado com esses critérios."
+
+
+# ── Fatia 3 · H03: reusar trocando os looks ────────────────────────────────
+
+
+def id_do_salvo(resposta: str) -> str:
+    """Tira o id da resposta do salvar_prompt: "Prompt salvo com id 3f9a1c2e na…"."""
+    return resposta.split("com id ")[1].split()[0]
+
+
+def test_reusa_trocando_os_looks():
+    """H03: um prompt por look, com o {{look}} preenchido pela peça, a cor e o tecido."""
+    id = id_do_salvo(
+        salvar_prompt(
+            titulo="Editorial de praia",
+            texto="Foto na praia. A modelo veste {{look}}. Corpo inteiro.",
+            colecao="Verão 2027",
+        )
+    )
+    resposta = reusar_prompt(
+        id,
+        [
+            PedidoDeLook(peca="vestido midi", cor_e_tecido="verde-oliva, linho"),
+            PedidoDeLook(peca="conjunto de alfaiataria", cor_e_tecido="areia, crepe"),
+        ],
+    )
+    assert "A modelo veste vestido midi, verde-oliva, linho." in resposta
+    assert "A modelo veste conjunto de alfaiataria, areia, crepe." in resposta
+    assert "ainda é rascunho" in resposta  # avisa que não é o padrão aprovado
+
+
+def test_avisa_ao_salvar_sem_look():
+    """Ao salvar um prompt sem {{look}}, o sistema avisa que ele não poderá ser reusado."""
+    resposta = salvar_prompt(titulo="Estúdio", texto="Vestido vermelho de seda.", colecao="Verão")
+    assert "não tem {{look}}" in resposta
+
+
+def test_recusa_reusar_prompt_sem_look():
+    """Sem {{look}} não há onde trocar a peça: a ferramenta devolve um erro claro."""
+    id = id_do_salvo(salvar_prompt(titulo="Estúdio", texto="Vestido de seda.", colecao="Verão"))
+    with pytest.raises(ToolError, match="não tem {{look}}"):
+        reusar_prompt(id, [PedidoDeLook(peca="saia")])
+
+
+def test_recusa_id_inexistente():
+    """Um id que não existe gera erro, e não uma resposta vazia."""
+    with pytest.raises(ToolError, match="Não encontrei"):
+        reusar_prompt("nao-existe", [PedidoDeLook(peca="saia")])
+
+
+def test_reusar_pelo_protocolo():
+    """Pelo protocolo (como o Claude chama), os looks chegam como JSON e viram PedidoDeLook."""
+    id = id_do_salvo(salvar_prompt(titulo="Praia", texto="Veste {{look}}.", colecao="Verão"))
+    resultado = asyncio.run(
+        servidor.call_tool("reusar_prompt", {"id": id, "looks": [{"peca": "saia"}]})
+    )
+    assert "Veste saia." in resultado.structured_content["result"]

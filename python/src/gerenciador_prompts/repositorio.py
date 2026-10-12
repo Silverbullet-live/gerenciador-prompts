@@ -3,6 +3,7 @@
 from gerenciador_prompts.modelo import (
     LIMITES,
     Colecao,
+    Look,
     Prompt,
     ResumoDaColecao,
     id_da_colecao,
@@ -15,6 +16,7 @@ class RepositorioEmMemoria:
     def __init__(self):
         self.prompts = []  # a "gaveta" deste repositório: começa vazia
         self.colecoes = {}  # Fatia 2: as coleções, pelo id ("verao-2027" → Colecao)
+        self.looks = []  # Fatia 3: os looks gerados a partir dos prompts
 
     def salvar_prompt(self, prompt: Prompt) -> Prompt:
         """Guarda o prompt e o devolve."""
@@ -78,6 +80,17 @@ class RepositorioEmMemoria:
             if prompt.id == id and not prompt.oculto:
                 return prompt
         return None
+
+    # ── Fatia 3 · H03: looks ───────────────────────────────────────────────
+
+    def salvar_looks(self, looks: list[Look]) -> list[Look]:
+        """Guarda os looks gerados de uma vez e os devolve."""
+        self.looks.extend(looks)  # extend: acrescenta todos os itens de uma lista
+        return looks
+
+    def looks_do_prompt(self, prompt_id: str) -> list[Look]:
+        """Os looks que nasceram de um prompt."""
+        return [look for look in self.looks if look.prompt_id == prompt_id]
 
 
 def combina(

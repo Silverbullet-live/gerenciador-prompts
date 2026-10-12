@@ -8,9 +8,17 @@ from typing import Annotated
 # Que peça da arquitetura estou construindo: [Servidor MCP]
 # Que biblioteca em Python usar para MCP: [SDK oficial mcp]
 from mcp.server.mcpserver import MCPServer
-from pydantic import Field
+from mcp.server.mcpserver.exceptions import ToolError
+from pydantic import BaseModel, Field
 
-from gerenciador_prompts.modelo import LIMITES, Prompt, id_da_colecao
+from gerenciador_prompts.modelo import (
+    LIMITES,
+    Look,
+    Prompt,
+    id_da_colecao,
+    preencher_look,
+    variaveis_do_texto,
+)
 from gerenciador_prompts.repositorio import RepositorioEmMemoria
 
 # O que o Claude lê ao conectar: quando e como usar cada ferramenta.
@@ -22,6 +30,8 @@ para não perdê-los, não reescrevê-los a cada troca de coleção e manter um 
 - Salvar: use salvar_prompt quando a pessoa pedir para salvar, guardar ou registrar um prompt.
   Se ela falar em "categoria", trate como coleção. Se não disser a coleção, chame
   listar_colecoes e sugira uma existente. Se não disser um título, proponha um curto.
+- {{look}}: quando o prompt descreve uma peça específica, sugira trocar a peça por {{look}}
+  antes de salvar. Assim o prompt pode ser reusado em toda a coleção (reusar_prompt).
 - Tudo aparece num mural público projetado em sala: nunca salve dados pessoais (nome completo,
   telefone, e-mail, documentos). Se o texto contiver algo assim, avise e peça para remover."""
 
@@ -66,9 +76,13 @@ def salvar_prompt(
     c = repo.garantir_colecao(colecao, temporada, ano, editor_responsavel=autor)
     prompt = Prompt(titulo=titulo.strip(), texto=texto, colecao=c.id, autor=autor.strip())
     repo.salvar_prompt(prompt)
+    # Fatia 3: avisar quando o prompt não poderá ser reusado.
+    dica = ""
+    if "look" not in variaveis_do_texto(texto):
+        dica = " Dica: ele não tem {{look}}, então ainda não pode ser reusado trocando a peça."
     return (
         f'Prompt salvo com id {prompt.id} na coleção "{c.nome}", como rascunho. '
-        "Já aparece no mural."
+        f"Já aparece no mural.{dica}"
     )
 
 
@@ -90,6 +104,56 @@ def buscar_prompts(
     if not achados:
         return "Nenhum prompt encontrado com esses critérios."
     return f"{len(achados)} prompt(s):\n" + "\n".join(resumo(p) for p in achados)
+
+
+# Fatia 3 · H03: reusar trocando os looks
+class PedidoDeLook(BaseModel):
+    """Um look pedido pelo editor: a peça e, se quiser, a cor e o tecido."""
+
+    peca: Annotated[str, Field(min_length=1, max_length=LIMITES["peca"])]
+    cor_e_tecido: Annotated[str, Field(max_length=LIMITES["peca"])] | None = None
+
+
+@servidor.tool()
+def reusar_prompt(
+    id: Annotated[str, Field(min_length=1, max_length=64)],
+    looks: Annotated[
+        list[PedidoDeLook], Field(min_length=1, max_length=LIMITES["looks_por_pedido"])
+    ],
+) -> str:
+    """Gera um prompt por look, trocando o {{look}} pela peça. Registra os looks da coleção."""
+    prompt = repo.obter(id.strip())
+    if prompt is None:
+        raise ToolError(f'Não encontrei um prompt com id "{id}".')
+    if "look" not in variaveis_do_texto(prompt.texto):
+        raise ToolError(
+            f'O prompt "{prompt.titulo}" não tem {{{{look}}}}: não há onde trocar a peça. '
+            "Salve uma versão com {{look}} no lugar da peça."
+        )
+    novos = []
+    for pedido in looks:
+        peca = pedido.peca.strip()
+        cor = pedido.cor_e_tecido.strip() if pedido.cor_e_tecido else None
+        novos.append(
+            Look(
+                prompt_id=prompt.id,
+                colecao=prompt.colecao,
+                peca=peca,
+                cor_e_tecido=cor,
+                texto_gerado=preencher_look(prompt.texto, peca, cor),
+            )
+        )
+    repo.salvar_looks(novos)
+    aviso = ""
+    if prompt.status != "aprovado":
+        aviso = "\n⚠ Este prompt ainda é rascunho: não é o padrão aprovado da coleção."
+    blocos = []
+    for i, look in enumerate(novos, start=1):  # enumerate: numera os itens a partir de 1
+        nome = f"{look.peca} ({look.cor_e_tecido})" if look.cor_e_tecido else look.peca
+        blocos.append(f"── Look {i} · {nome}\n{look.texto_gerado}")
+    return f'{len(novos)} look(s) gerado(s) a partir de "{prompt.titulo}":{aviso}\n\n' + (
+        "\n\n".join(blocos)
+    )
 
 
 def resumo(p: Prompt) -> str:

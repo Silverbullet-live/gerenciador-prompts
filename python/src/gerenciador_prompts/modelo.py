@@ -1,5 +1,6 @@
 """Modelo de domínio da Fashion Co. (docs/03-classes.md)."""
 
+import re
 import unicodedata
 import uuid
 from dataclasses import dataclass, field
@@ -11,6 +12,8 @@ LIMITES = {
     "texto": 4000,
     "colecao": 40,
     "apelido": 40,
+    "peca": 80,
+    "looks_por_pedido": 12,
     "resultados_busca": 20,
 }
 
@@ -74,3 +77,40 @@ class ResumoDaColecao:
     colecao: Colecao
     total_de_prompts: int
     aprovado: str | None = None  # o título do prompt aprovado, se houver
+
+
+# ── Fatia 3 · H03: reusar trocando os looks ─────────────────────────────────
+
+# {{look}}, {{ look }} ou {{ qualquer_nome }}: as variáveis de um prompt.
+VARIAVEL = re.compile(r"\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}")
+
+
+def variaveis_do_texto(texto: str) -> list[str]:
+    """As variáveis {{assim}} de um texto, na ordem em que aparecem, sem repetir."""
+    nomes = []
+    for nome in VARIAVEL.findall(texto):
+        if nome not in nomes:
+            nomes.append(nome)
+    return nomes
+
+
+def preencher_look(texto: str, peca: str, cor_e_tecido: str | None = None) -> str:
+    """Troca o {{look}} pela peça: "A modelo veste {{look}}" vira "A modelo veste vestido midi"."""
+    look = f"{peca}, {cor_e_tecido}" if cor_e_tecido else peca
+    # lambda: a peça entra como texto puro, mesmo se tiver "\\" (que o re.sub leria como código)
+    return re.sub(r"\{\{\s*look\s*\}\}", lambda _: look, texto)
+
+
+@dataclass
+class Look:
+    """Uma peça da coleção, gerada a partir de um prompt trocando o {{look}}."""
+
+    prompt_id: str
+    colecao: str
+    peca: str
+    texto_gerado: str  # o prompt com o {{look}} já preenchido, pronto para a IA de imagem
+    cor_e_tecido: str | None = None
+    imagem_gerada: str | None = None  # RF06: a imagem aprovada (a v1 ainda não guarda, issue #5)
+    entrega_id: str | None = None
+    id: str = field(default_factory=novo_id)
+    criado_em: datetime = field(default_factory=agora)
