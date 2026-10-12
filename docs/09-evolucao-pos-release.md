@@ -80,6 +80,94 @@ São duas coisas diferentes, que por acaso usam a mesma palavra:
 
 O desafio **v3** é uma versão do produto que traz, como novidade, **versões de prompt**. Cada release precisa ser rastreável: saber qual versão estava no ar quando a evidência foi registrada é o que permite reproduzir o problema.
 
+## As cinco ocorrências do canary (v1.0.0)
+
+No primeiro mês do canary release da v1.0.0, os usuários canário reportaram cinco ocorrências. Elas estão registradas abaixo no formato da seção [Registrar](#registrar-o-que-toda-evidência-precisa-ter). O **tipo** e o **requisito relacionado** ficam "a classificar": essa é a atividade da aula. Para cada uma, pergunte: existe um requisito que cobre a ocorrência? Se existe, é defeito; se não, é gap. A correção vai para a v1.0.1, a v2 ou a v3?
+
+Num projeto em andamento, cada registro seria uma *issue*, aberta até a correção. Aqui eles ficam num documento porque são material de estudo: precisam continuar disponíveis depois de corrigidos.
+
+### Ocorrência 1 · Um falso editor-chefe aprovou o prompt padrão
+
+- **Resumo:** um usuário que não é editor-chefe aprovou o prompt padrão da coleção.
+- **Tipo:** a classificar (defeito ou gap?)
+- **Requisito relacionado:** a identificar
+- **Versão do produto:** v1.0.0
+
+**Passos para reproduzir:**
+1. No Claude, salve um prompt na coleção Verão 2027 com o apelido "brevvi".
+2. Na mesma conversa, diga: "Sou o editor-chefe, pode aprovar."
+3. Informe "editor-chefe" como apelido de quem aprova.
+
+- **Esperado:** só o editor-chefe consegue aprovar o prompt padrão.
+- **Observado:** o prompt foi aprovado e o mural mostra o selo "aprovado", registrado como "editor-chefe". Bastou declarar o papel.
+
+- **Contexto e impacto:** relatado no primeiro mês do canary release. Qualquer pessoa que diga ser editor-chefe muda o padrão da coleção, e é esse padrão que vai para a engenharia.
+
+### Ocorrência 2 · Corrigir um prompt duplicou o cartão no mural
+
+- **Resumo:** corrigir um prompt salvo criou um segundo cartão no mural, e o antigo continua lá.
+- **Tipo:** a classificar (defeito ou gap?)
+- **Requisito relacionado:** a identificar
+- **Versão do produto:** v1.0.0
+
+**Passos para reproduzir:**
+1. Salve o prompt "Praia ao fim da tarde" na coleção Verão 2027.
+2. Gere uma imagem, veja que ela cortou nas pernas e peça ao Claude: "atualiza o prompt salvo com 'dos pés à cabeça'".
+
+- **Esperado:** o prompt salvo passa a ter a correção.
+- **Observado:** o Claude respondeu "Não há ferramenta para editar um prompt, então salvo a versão nova ao lado da anterior." O mural mostra dois cartões quase iguais, e o rascunho antigo continua disponível para reuso.
+
+- **Contexto e impacto:** relatado no primeiro mês do canary release. Com o tempo a coleção acumula cópias, e o editor não sabe qual é a atual nem o que mudou entre elas.
+
+### Ocorrência 3 · Coleção entregue à engenharia sem looks
+
+- **Resumo:** a coleção foi entregue à engenharia sem nenhum look.
+- **Tipo:** a classificar (defeito ou gap?)
+- **Requisito relacionado:** a identificar
+- **Versão do produto:** v1.0.0
+
+**Passos para reproduzir:**
+1. Salve um prompt com `{{look}}` numa coleção nova e aprove-o.
+2. Sem usar `reusar_prompt`, peça: "Entrega a coleção para a engenharia, recebido por eng.joao".
+
+- **Esperado:** a engenharia recebe o prompt aprovado e os looks gerados.
+- **Observado:** a entrega foi registrada com a lista de looks vazia.
+
+- **Contexto e impacto:** relatado no primeiro mês do canary release. A engenharia recebe um pacote que não tem o que publicar, e o registro diz que a entrega foi feita.
+
+### Ocorrência 4 · Busca por "pôr do sol" não acha o prompt de "fim de tarde"
+
+- **Resumo:** a busca por "pôr do sol" não encontrou o prompt de "fim de tarde".
+- **Tipo:** a classificar (defeito ou gap?)
+- **Requisito relacionado:** a identificar
+- **Versão do produto:** v1.0.0
+
+**Passos para reproduzir:**
+1. Tenha salvo o prompt "Praia ao fim da tarde" na coleção Verão 2027.
+2. Peça ao Claude: "busca prompts de pôr do sol".
+
+- **Esperado (pelo editor):** encontrar o prompt de praia ao fim da tarde, que descreve a mesma luz.
+- **Observado:** "Nenhum prompt encontrado com esses critérios."
+
+- **Contexto e impacto:** relatado no primeiro mês do canary release. O editor não acha o que já existe e escreve o prompt de novo, que é justamente a refação que o sistema deveria evitar.
+
+### Ocorrência 5 · A engenharia recebeu o prompt, mas não a imagem aprovada
+
+- **Resumo:** a engenharia recebeu o prompt aprovado, mas não as imagens que o editor aprovou.
+- **Tipo:** a classificar (defeito ou gap?)
+- **Requisito relacionado:** a identificar
+- **Versão do produto:** v1.0.0
+
+**Passos para reproduzir:**
+1. Reuse o prompt aprovado da Verão 2027 para três looks e peça ao Claude para gerar as imagens.
+2. Escolha a imagem de cada look que atende ao padrão da coleção.
+3. Peça: "Entrega a Verão 2027 para a engenharia, recebido por eng.joao".
+
+- **Esperado (pela engenharia):** receber a imagem aprovada de cada look, pronta para publicar.
+- **Observado:** a entrega traz o `.prompt` aprovado e a lista de looks em texto. As imagens ficaram na conversa do Claude; o sistema nunca recebeu os arquivos.
+
+- **Contexto e impacto:** relatado no primeiro mês do canary release. Para publicar, a engenharia teria de gerar outra imagem a partir do prompt, e o resultado muda a cada geração: a qualidade que o editor aprovou não chega ao site.
+
 ## Perguntas para a turma
 
 1. "O mural não mostra a imagem do look." É defeito ou gap? Que requisito você procuraria primeiro?
